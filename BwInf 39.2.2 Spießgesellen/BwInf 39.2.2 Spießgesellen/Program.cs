@@ -15,6 +15,11 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// reads data; returns Tuple von Wunschspiess und einer Liste von beobachteten Spiessen
+        /// </summary>
+        /// <param name="number">number of file (eg spiesse3.txt -> number=3)</param>
+        /// <returns>Tuple von Wunschspiess und einer Liste von beobachteten Spiessen</returns>
         public static Tuple<Spiess,List<Spiess>> readData(int number) {
             string[] lines = System.IO.File.ReadAllLines(System.IO.Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName+"/spiesse"+number+".txt");
             Spiess wunschspiess = new Spiess(new List<int>(), lines[1].Trim().Split(' ').ToList());
