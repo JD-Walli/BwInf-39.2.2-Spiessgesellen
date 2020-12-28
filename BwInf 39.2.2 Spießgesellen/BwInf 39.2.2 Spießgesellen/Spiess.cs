@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BwInf_39_2_2_Spießgesellen {
     class Spiess {
-        int length;
-        List<int> bowls = new List<int>();
-        List<string> fruits = new List<string>();
+        public int length;
+        public List<int> bowls = new List<int>();
+        public List<string> fruits = new List<string>();
 
         public Spiess(List<int> bowls, List<string> fruits) {
             this.bowls = bowls;
@@ -26,6 +26,7 @@ namespace BwInf_39_2_2_Spießgesellen {
 
         /// <summary>
         /// compares 2 Spiesse; erstellt neuen Spiess mit Schnittmenge von bowls und fruits; entfernt Schnittmenge aus Ursprungsspiessen
+        /// returns Tuple von verändertem spiess2 und dem neuen Schnittmengen-Spiess
         /// </summary>
         /// <param name="spiess2">Vergleichsspiess</param>
         /// <returns>Tuple von verändertem spiess2 und dem neuen Schnittmengen-Spiess</returns>
@@ -57,6 +58,8 @@ namespace BwInf_39_2_2_Spießgesellen {
                 fruits.Remove(returnSpiess.fruits[i]);
                 spiess2.fruits.Remove(returnSpiess.fruits[i]);
             }
+            updateLength();
+            spiess2.updateLength();
             return new Tuple<Spiess, Spiess>(spiess2, returnSpiess);
         }
 
