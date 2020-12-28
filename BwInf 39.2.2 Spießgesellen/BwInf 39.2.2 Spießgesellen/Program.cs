@@ -39,24 +39,21 @@ namespace BwInf_39_2_2_Spießgesellen {
             spiesse.RemoveAll(sp => sp.length == 0);//laufzeitoptimierung?
 
             //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
-            //zu verbessern
             int beobachteteSorten = 0;
             foreach (Spiess sp in spiesse) {
                 beobachteteSorten += sp.length;
             }
             if (beobachteteSorten != gesamtObst) {
                 List<string> unbeobachteteSorten = new List<string>();
-                for (int i = 0; i < wunschSpiess.length; i++) {
+                foreach (string wunschObst in wunschSpiess.fruits) {
                     bool wunschObstBeobachtet = false;
-                    for (int j = 0; j < spiesse.Count; j++) {
-                        for (int k = 0; k < spiesse[j].length; k++) {
-                            if (wunschSpiess.fruits[i] == spiesse[j].fruits[k]) {
-                                wunschObstBeobachtet = true;
-                            }
+                    foreach (Spiess sp in spiesse) {
+                        if (sp.fruits.Contains(wunschObst)) {
+                            wunschObstBeobachtet = true;
                         }
                     }
                     if (wunschObstBeobachtet == false) {
-                        unbeobachteteSorten.Add(wunschSpiess.fruits[i]);
+                        unbeobachteteSorten.Add(wunschObst);
                     }
                 }
                 switch (unbeobachteteSorten.Count) {
@@ -64,9 +61,9 @@ namespace BwInf_39_2_2_Spießgesellen {
                     break;
 
                     case 1:
-                    int unbeobachtetBowlNum = ((gesamtObst)*(gesamtObst+1))/2; //Summe der Zahlen 1 bis n (alle bowl-nummern addiert)
+                    int unbeobachtetBowlNum = ((gesamtObst) * (gesamtObst + 1)) / 2; //Summe der Zahlen 1 bis n (alle bowl-nummern addiert)
                     unbeobachtetBowlNum -= spiesse.Sum(sp => sp.bowls.Sum());
-                    spiesse.Add(new Spiess(new List<int>(unbeobachtetBowlNum), unbeobachteteSorten));
+                    spiesse.Add(new Spiess(new List<int>() { unbeobachtetBowlNum }, unbeobachteteSorten));
                     break;
 
                     default:
