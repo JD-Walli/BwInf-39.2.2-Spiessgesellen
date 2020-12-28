@@ -8,47 +8,50 @@ namespace BwInf_39_2_2_Spießgesellen {
     class Program {
         static void Main(string[] args) {
             var tup = readData(1);
-            List<Spiess> spiesse = tup.Item2;
-            Console.WriteLine("Wunsch:\n{0}", string.Join(", ", tup.Item1.fruits));
+            List<Spieß> spieße = tup.Item2;
+            Console.WriteLine("Wunsch:\n{0}", string.Join(", ", tup.Item1.obstSorten));
             Console.WriteLine("Ausgangsdaten:");
-            foreach (Spiess spiess in spiesse) {
-                spiess.printSpiess();
+            foreach (Spieß spieß in spieße) {
+                spieß.printSpieß();
             }
-            algorithmus(tup.Item1, spiesse, tup.Item3);
+            algorithmus(tup.Item1, spieße, tup.Item3);
             Console.ReadLine();
         }
 
         //for durch foreach ersetzen
-        public static void algorithmus(Spiess wunschSpiess, List<Spiess> spiesse, int gesamtObst) {
-            Boolean didChange = true;
+        public static Tuple<Spieß,List<Spieß>> algorithmus(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
+            #region Spieße aufspalten
+            bool didChange = true;
             while (didChange) {
                 didChange = false;
-                for (int i = 0; i < spiesse.Count; i++) {
-                    for (int j = i; j < spiesse.Count; j++) {
+                for (int i = 0; i < spieße.Count; i++) {
+                    for (int j = i; j < spieße.Count; j++) {
                         if (i != j) {
-                            Tuple<Spiess, Spiess> tup1 = spiesse[i].compareSpiesse(spiesse[j]);
+                            Tuple<Spieß, Spieß> tup1 = spieße[i].vergleicheSpieße(spieße[j]);
                             if (tup1.Item2.length > 0) {
-                                spiesse[j] = tup1.Item1;
-                                spiesse.Add(tup1.Item2);
+                                spieße[j] = tup1.Item1;
+                                spieße.Add(tup1.Item2);
                                 didChange = true;
                             }
                         }
                     }
                 }
             }
-            spiesse.RemoveAll(sp => sp.length == 0);//laufzeitoptimierung?
+            spieße.RemoveAll(sp => sp.length == 0);//laufzeitoptimierung?
+            #endregion
 
+            #region gewünschte, unbeobachtete Obstsorten verarbeiten
             //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
             int beobachteteSorten = 0;
-            foreach (Spiess sp in spiesse) {
+            foreach (Spieß sp in spieße) {
                 beobachteteSorten += sp.length;
             }
             if (beobachteteSorten != gesamtObst) {
                 List<string> unbeobachteteSorten = new List<string>();
-                foreach (string wunschObst in wunschSpiess.fruits) {
+                foreach (string wunschObst in wunschSpieß.obstSorten) {
                     bool wunschObstBeobachtet = false;
-                    foreach (Spiess sp in spiesse) {
-                        if (sp.fruits.Contains(wunschObst)) {
+                    foreach (Spieß sp in spieße) {
+                        if (sp.obstSorten.Contains(wunschObst)) {
                             wunschObstBeobachtet = true;
                         }
                     }
@@ -61,56 +64,59 @@ namespace BwInf_39_2_2_Spießgesellen {
                     break;
 
                     case 1:
-                    int unbeobachtetBowlNum = ((gesamtObst) * (gesamtObst + 1)) / 2; //Summe der Zahlen 1 bis n (alle bowl-nummern addiert)
-                    unbeobachtetBowlNum -= spiesse.Sum(sp => sp.bowls.Sum());
-                    spiesse.Add(new Spiess(new List<int>() { unbeobachtetBowlNum }, unbeobachteteSorten));
-                    //wunschSpiess.bowls.Add(unbeobachtetBowlNum);
+                    int unbeobachteteSchüsselNum = ((gesamtObst) * (gesamtObst + 1)) / 2; //Summe der Zahlen 1 bis n (alle schüssel-nummern addiert)
+                    unbeobachteteSchüsselNum -= spieße.Sum(sp => sp.schüsseln.Sum());
+                    spieße.Add(new Spieß(new List<int>() { unbeobachteteSchüsselNum }, unbeobachteteSorten));
                     break;
 
                     default:
                     Console.WriteLine("{0} unbeobachtete Obstsorten stehen auf der Wunschliste:", unbeobachteteSorten.Count);
-                    foreach (string fruit in unbeobachteteSorten) {
-                        Console.WriteLine("- " + fruit);
+                    foreach (string obst in unbeobachteteSorten) {
+                        Console.WriteLine("- " + obst);
                     }
                     break;
                 }
             }
+            #endregion
 
-            //wenn ganzer Spiess in wunschSpiess enthalten ist, werden Spiess.bowls zu wunschSpiess.bowls hinzugefügt
-            foreach (Spiess spiess in spiesse) {
-                bool ganzerSpiessGewunscht = true;
-                foreach (string fruit in spiess.fruits) {
-                    if (!wunschSpiess.fruits.Contains(fruit)) {
-                        ganzerSpiessGewunscht = false;
+            #region Wunschspieß berechnen
+            //wenn ganzer Spieß in wunschSpieß enthalten ist, werden Spieß.schüsseln zu wunschSpieß.schüsseln hinzugefügt
+            foreach (Spieß spieß in spieße) {
+                bool ganzerSpießGewunscht = true;
+                foreach (string obst in spieß.obstSorten) {
+                    if (!wunschSpieß.obstSorten.Contains(obst)) {
+                        ganzerSpießGewunscht = false;
                     }
                 }
-                if (ganzerSpiessGewunscht) {
-                    wunschSpiess.bowls.AddRange(spiess.bowls);
+                if (ganzerSpießGewunscht) {
+                    wunschSpieß.schüsseln.AddRange(spieß.schüsseln);
                 }
             }
+            #endregion
 
             Console.WriteLine("\nSPIESSE:");
-            foreach (Spiess spiess in spiesse) {
-                spiess.printSpiess();
+            foreach (Spieß spieß in spieße) {
+                spieß.printSpieß();
             }
             Console.WriteLine("\nWUNSCHSPIESS:");
-            wunschSpiess.printSpiess();
+            wunschSpieß.printSpieß();
 
+            return new Tuple<Spieß, List<Spieß>>(wunschSpieß, spieße);
         }
 
         /// <summary>
-        /// reads data; returns Tuple von Wunschspiess, Liste von beobachteten Spiessen, Anzahl an fruits/bowls
+        /// reads data; returns Tuple von Wunschspieß, Liste von beobachteten Spießen, Anzahl an obstSorten/schüsseln
         /// </summary>
-        /// <param name="number">number of file (eg spiesse3.txt -> number=3)</param>
-        /// <returns>Tuple von Wunschspiess und einer Liste von beobachteten Spiessen</returns>
-        public static Tuple<Spiess, List<Spiess>, int> readData(int number) {
-            string[] lines = System.IO.File.ReadAllLines(System.IO.Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/spiesse" + number + ".txt");
-            Spiess wunschspiess = new Spiess(new List<int>(), lines[1].Trim().Split(' ').ToList());
-            List<Spiess> spiesse = new List<Spiess>();
+        /// <param name="number">number of file (eg spieße3.txt -> number=3)</param>
+        /// <returns>Tuple von Wunschspieß und einer Liste von beobachteten Spießen</returns>
+        public static Tuple<Spieß, List<Spieß>, int> readData(int number) {
+            string[] lines = System.IO.File.ReadAllLines(System.IO.Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/spieße" + number + ".txt");
+            Spieß wunschspieß = new Spieß(new List<int>(), lines[1].Trim().Split(' ').ToList());
+            List<Spieß> spieße = new List<Spieß>();
             for (int i = 3; i < int.Parse(lines[2]) * 2 + 3; i += 2) {
-                spiesse.Add(new Spiess(lines[i].Trim().Split(' ').ToList(), lines[i + 1].Trim().Split(' ').ToList()));
+                spieße.Add(new Spieß(lines[i].Trim().Split(' ').ToList(), lines[i + 1].Trim().Split(' ').ToList()));
             }
-            return new Tuple<Spiess, List<Spiess>, int>(wunschspiess, spiesse, int.Parse(lines[0].Trim()));
+            return new Tuple<Spieß, List<Spieß>, int>(wunschspieß, spieße, int.Parse(lines[0].Trim()));
         }
     }
 }

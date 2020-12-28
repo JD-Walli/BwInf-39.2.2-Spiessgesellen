@@ -5,79 +5,79 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BwInf_39_2_2_Spießgesellen {
-    class Spiess {
+    class Spieß {
         public int length;
-        public List<int> bowls = new List<int>();
-        public List<string> fruits = new List<string>();
+        public List<int> schüsseln = new List<int>();
+        public List<string> obstSorten = new List<string>();
 
-        public Spiess(List<int> bowls, List<string> fruits) {
-            this.bowls = bowls;
-            this.fruits = fruits;
-            length = fruits.Count();
+        public Spieß(List<int> schüsseln, List<string> obstSorten) {
+            this.schüsseln = schüsseln;
+            this.obstSorten = obstSorten;
+            length = obstSorten.Count();
         }
 
-        public Spiess(List<string> bowls, List<string> fruits) {
-            foreach (string bowl in bowls) {
-                this.bowls.Add(int.Parse(bowl.Trim()));
+        public Spieß(List<string> schüsseln, List<string> obstSorten) {
+            foreach (string schüssel in schüsseln) {
+                this.schüsseln.Add(int.Parse(schüssel.Trim()));
             }
-            this.fruits = fruits;
-            length = fruits.Count();
+            this.obstSorten = obstSorten;
+            length = obstSorten.Count();
         }
 
         /// <summary>
-        /// compares 2 Spiesse; erstellt neuen Spiess mit Schnittmenge von bowls und fruits; entfernt Schnittmenge aus Ursprungsspiessen
-        /// returns Tuple von verändertem spiess2 und dem neuen Schnittmengen-Spiess
+        /// compares 2 Spieße; erstellt neuen Spieß mit Schnittmenge von schüsseln und obstSorten; entfernt Schnittmenge aus Ursprungsspießen
+        /// returns Tuple von verändertem spieß2 und dem neuen Schnittmengen-Spieß
         /// </summary>
-        /// <param name="spiess2">Vergleichsspiess</param>
-        /// <returns>Tuple von verändertem spiess2 und dem neuen Schnittmengen-Spiess</returns>
-        public Tuple<Spiess,Spiess> compareSpiesse(Spiess spiess2) {
-            Spiess returnSpiess = new Spiess(new List<int>(),new List<string>());
+        /// <param name="spieß2">Vergleichsspieß</param>
+        /// <returns>Tuple von verändertem spieß2 und dem neuen Schnittmengen-Spieß</returns>
+        public Tuple<Spieß,Spieß> vergleicheSpieße(Spieß spieß2) {
+            Spieß returnSpieß = new Spieß(new List<int>(),new List<string>());
             //für Laufzeitoptimierung
             /*List<int> fruitsToDelete1 = new List<int>();
-            List<int> bowlsToDelete1 = new List<int>();
+            List<int> schüsselnToDelete1 = new List<int>();
             List<int> fruitsToDelete2 = new List<int>();
-            List<int> bowlsToDelete2 = new List<int>();*/
+            List<int> schüsselnToDelete2 = new List<int>();*/
             for (int i = 0; i < length; i++) {
-                for (int j = 0; j < spiess2.length; j++) {
-                    if (bowls[i] == spiess2.bowls[j]) {
-                        returnSpiess.bowls.Add(bowls[i]);
-                        //bowlsToDelete1.Add(i);Laufzeitoptimierung
-                        //bowlsToDelete2.Add(j);
+                for (int j = 0; j < spieß2.length; j++) {
+                    if (schüsseln[i] == spieß2.schüsseln[j]) {
+                        returnSpieß.schüsseln.Add(schüsseln[i]);
+                        //schüsselnToDelete1.Add(i);Laufzeitoptimierung
+                        //schüsselnToDelete2.Add(j);
                     }
-                    if (fruits[i] == spiess2.fruits[j]) {
-                        returnSpiess.fruits.Add(fruits[i]);
+                    if (obstSorten[i] == spieß2.obstSorten[j]) {
+                        returnSpieß.obstSorten.Add(obstSorten[i]);
                         //fruitsToDelete1.Add(i);Laufzeitoptimierung
                         //fruitsToDelete2.Add(j);
                     }
                 }
             }
-            returnSpiess.updateLength();
-            for(int i = 0; i < returnSpiess.length;i++) {
-                bowls.Remove(returnSpiess.bowls[i]);
-                spiess2.bowls.Remove(returnSpiess.bowls[i]);
-                fruits.Remove(returnSpiess.fruits[i]);
-                spiess2.fruits.Remove(returnSpiess.fruits[i]);
+            returnSpieß.updateLength();
+            for(int i = 0; i < returnSpieß.length;i++) {
+                schüsseln.Remove(returnSpieß.schüsseln[i]);
+                spieß2.schüsseln.Remove(returnSpieß.schüsseln[i]);
+                obstSorten.Remove(returnSpieß.obstSorten[i]);
+                spieß2.obstSorten.Remove(returnSpieß.obstSorten[i]);
             }
             updateLength();
-            spiess2.updateLength();
-            return new Tuple<Spiess, Spiess>(spiess2, returnSpiess);
+            spieß2.updateLength();
+            return new Tuple<Spieß, Spieß>(spieß2, returnSpieß);
         }
 
         public void updateLength() {
-            length = fruits.Count();
+            length = obstSorten.Count();
         }
         
         /// <summary>
-        /// prints fruits -> bowls
+        /// prints obstSorten -> schüsseln
         /// </summary>
-        public void printSpiess() {
+        public void printSpieß() {
             string output = "";
-            foreach (string fruit in fruits) {
-                output += fruit + " ";
+            foreach (string obst in obstSorten) {
+                output += obst + " ";
             }
             output += " -> ";
-            foreach (int bowl in bowls) {
-                output += bowl + " ";
+            foreach (int schüssel in schüsseln) {
+                output += schüssel + " ";
             }
             Console.WriteLine(output);
         }
