@@ -64,6 +64,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                     int unbeobachtetBowlNum = ((gesamtObst) * (gesamtObst + 1)) / 2; //Summe der Zahlen 1 bis n (alle bowl-nummern addiert)
                     unbeobachtetBowlNum -= spiesse.Sum(sp => sp.bowls.Sum());
                     spiesse.Add(new Spiess(new List<int>() { unbeobachtetBowlNum }, unbeobachteteSorten));
+                    //wunschSpiess.bowls.Add(unbeobachtetBowlNum);
                     break;
 
                     default:
@@ -75,10 +76,25 @@ namespace BwInf_39_2_2_Spießgesellen {
                 }
             }
 
+            //wenn ganzer Spiess in wunschSpiess enthalten ist, werden Spiess.bowls zu wunschSpiess.bowls hinzugefügt
+            foreach (Spiess spiess in spiesse) {
+                bool ganzerSpiessGewunscht = true;
+                foreach (string fruit in spiess.fruits) {
+                    if (!wunschSpiess.fruits.Contains(fruit)) {
+                        ganzerSpiessGewunscht = false;
+                    }
+                }
+                if (ganzerSpiessGewunscht) {
+                    wunschSpiess.bowls.AddRange(spiess.bowls);
+                }
+            }
+
             Console.WriteLine("\nSPIESSE:");
             foreach (Spiess spiess in spiesse) {
                 spiess.printSpiess();
             }
+            Console.WriteLine("\nWUNSCHSPIESS:");
+            wunschSpiess.printSpiess();
 
         }
 
