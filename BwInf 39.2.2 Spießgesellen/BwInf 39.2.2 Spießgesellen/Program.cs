@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BwInf_39_2_2_Spießgesellen {
     class Program {
         static void Main(string[] args) {
-            var tup = readData(1);
+            var tup = readData(3);
             List<Spieß> spieße = tup.Item2;
             Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", tup.Item1.obstSorten));
             Console.WriteLine("\nBEOBACHTETE SPIESSE:");
