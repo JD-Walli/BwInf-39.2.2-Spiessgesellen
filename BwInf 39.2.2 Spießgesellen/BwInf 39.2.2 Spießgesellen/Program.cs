@@ -9,8 +9,8 @@ namespace BwInf_39_2_2_Spießgesellen {
         static void Main(string[] args) {
             var tup = readData(1);
             List<Spieß> spieße = tup.Item2;
-            Console.WriteLine("Wunsch:\n{0}", string.Join(", ", tup.Item1.obstSorten));
-            Console.WriteLine("Ausgangsdaten:");
+            Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", tup.Item1.obstSorten));
+            Console.WriteLine("\nBEOBACHTETE SPIESSE:");
             foreach (Spieß spieß in spieße) {
                 spieß.printSpieß();
             }
@@ -18,8 +18,15 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.ReadLine();
         }
 
-        //for durch foreach ersetzen
-        public static Tuple<Spieß,List<Spieß>> algorithmus(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
+        /// <summary>
+        /// berechnet Wunschspieß.schüsseln
+        /// returns Wunschspieß und gesplitete spieße
+        /// </summary>
+        /// <param name="wunschSpieß">gewünschte Obstsorten</param>
+        /// <param name="spieße">Liste mit beobachteten Spießen</param>
+        /// <param name="gesamtObst">anzahl aller Obstsorten</param>
+        /// <returns></returns>
+        public static Tuple<Spieß, List<Spieß>> algorithmus(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
             #region Spieße aufspalten
             bool didChange = true;
             while (didChange) {
@@ -42,40 +49,37 @@ namespace BwInf_39_2_2_Spießgesellen {
 
             #region gewünschte, unbeobachtete Obstsorten verarbeiten
             //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
+            //wenn n sorten unbeobachtet und gewünscht und sonst keine, kann TROTZDEM eine Lösung ausgegeben werden
             int beobachteteSorten = 0;
             foreach (Spieß sp in spieße) {
                 beobachteteSorten += sp.length;
             }
             if (beobachteteSorten != gesamtObst) {
+                //gewünschte Sorten, die nicht beobachtet werden ausfindig machen
                 List<string> unbeobachteteSorten = new List<string>();
                 foreach (string wunschObst in wunschSpieß.obstSorten) {
                     bool wunschObstBeobachtet = false;
                     foreach (Spieß sp in spieße) {
-                        if (sp.obstSorten.Contains(wunschObst)) {
-                            wunschObstBeobachtet = true;
-                        }
+                        if (sp.obstSorten.Contains(wunschObst)) { wunschObstBeobachtet = true; }
                     }
-                    if (wunschObstBeobachtet == false) {
-                        unbeobachteteSorten.Add(wunschObst);
-                    }
+                    if (!wunschObstBeobachtet) { unbeobachteteSorten.Add(wunschObst); }
                 }
-                switch (unbeobachteteSorten.Count) {
-                    case 0:
-                    break;
-
-                    case 1:
-                    int unbeobachteteSchüsselNum = ((gesamtObst) * (gesamtObst + 1)) / 2; //Summe der Zahlen 1 bis n (alle schüssel-nummern addiert)
-                    unbeobachteteSchüsselNum -= spieße.Sum(sp => sp.schüsseln.Sum());
-                    spieße.Add(new Spieß(new List<int>() { unbeobachteteSchüsselNum }, unbeobachteteSorten));
-                    break;
-
-                    default:
-                    Console.WriteLine("{0} unbeobachtete Obstsorten stehen auf der Wunschliste:", unbeobachteteSorten.Count);
-                    foreach (string obst in unbeobachteteSorten) {
-                        Console.WriteLine("- " + obst);
-                    }
-                    break;
+                //sollten Sorten weder gewünscht noch beobachtet sein, aber existieren, werden sie als unbekannte Obstsorte hinterlegt
+                for (int i = 0; unbeobachteteSorten.Count < gesamtObst - beobachteteSorten; i++) {
+                    unbeobachteteSorten.Add("unbekannte Obstsorte " + i);
                 }
+
+                //Schüsselnummern, die nicht genannt wurden, aber existieren müssen, werden ausfindig gemacht
+                List<int> unbeobachteteSchüsseln = new List<int>();
+                for (int i = 1; i <= gesamtObst; i++) {
+                    bool schüsselBeobachtet = false;
+                    foreach (Spieß spieß in spieße) {
+                        if (spieß.schüsseln.Contains(i)) { schüsselBeobachtet = true; }
+                    }
+                    if (!schüsselBeobachtet) { unbeobachteteSchüsseln.Add(i); }
+                }
+
+                spieße.Add(new Spieß(unbeobachteteSchüsseln, unbeobachteteSorten));
             }
             #endregion
 
@@ -94,7 +98,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
             #endregion
 
-            Console.WriteLine("\nSPIESSE:");
+            Console.WriteLine("\nAUFGESPLITETE SPIESSE:");
             foreach (Spieß spieß in spieße) {
                 spieß.printSpieß();
             }
