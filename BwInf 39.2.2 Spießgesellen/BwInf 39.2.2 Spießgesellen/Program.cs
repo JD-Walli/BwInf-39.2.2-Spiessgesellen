@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BwInf_39_2_2_Spießgesellen {
     class Program {
         static void Main(string[] args) {
-            var tup = readData(3);
+            var tup = readData(7);
             List<Spieß> spieße = tup.Item2;
             Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", tup.Item1.obstSorten));
             Console.WriteLine("\nBEOBACHTETE SPIESSE:");
@@ -85,18 +85,23 @@ namespace BwInf_39_2_2_Spießgesellen {
 
             #region Wunschspieß berechnen
             //wenn ganzer Spieß in wunschSpieß enthalten ist, werden Spieß.schüsseln zu wunschSpieß.schüsseln hinzugefügt
+            List<Tuple<Spieß, List<string>>> spießeHalbfalsch = new List<Tuple<Spieß, List<string>>>(); //Spieß und nummern der falschen Sorten
             foreach (Spieß spieß in spieße) {
-                bool ganzerSpießGewunscht = true;
+                List<string> unpassendeSorten = new List<string>();
                 foreach (string obst in spieß.obstSorten) {
                     if (!wunschSpieß.obstSorten.Contains(obst)) {
-                        ganzerSpießGewunscht = false;
+                        unpassendeSorten.Add(obst);
                     }
                 }
-                if (ganzerSpießGewunscht) {
+                if (unpassendeSorten.Count == 0) {//ganzerSpießGewunscht
                     wunschSpieß.schüsseln.AddRange(spieß.schüsseln);
+                }
+                else if (unpassendeSorten.Count != spieß.length) {
+                    spießeHalbfalsch.Add(new Tuple<Spieß, List<string>>(spieß, unpassendeSorten));
                 }
             }
             #endregion
+
 
             Console.WriteLine("\nAUFGESPLITETE SPIESSE:");
             foreach (Spieß spieß in spieße) {
@@ -104,6 +109,18 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
             Console.WriteLine("\nWUNSCHSPIESS:");
             wunschSpieß.printSpieß();
+
+            Console.WriteLine("\nTIPPS\n nicht alle Obstsorten konnten eindeutig einer Schüssel zugeordnet werden.\n nicht-eindeutige Zuordnungen:");
+            //spießeHalbfalsch.Sort((tup1, tup2) => ((tup1.Item1.length-tup1.Item2.Count) / tup1.Item1.length).CompareTo((tup2.Item1.length - tup2.Item2.Count) / tup2.Item1.length));//elemente mit einem besseren gewünschteSortenImSpieß zu Spießlänge Verhältnis weiter oben
+            var query= spießeHalbfalsch.OrderBy(tup1 => (float)tup1.Item1.length/(float)tup1.Item2.Count);//((tup1.Item1.length - tup1.Item2.Count) / tup1.Item1.length));
+            foreach (Tuple<Spieß, List<string>> spieß in query) {
+                spieß.Item1.printSpieß();
+                string output = "";
+                foreach (string t in spieß.Item1.obstSorten) {
+                    if (!spieß.Item2.Contains(t)) { output += t + " "; }
+                }
+                Console.WriteLine(" davon ist Obst \"{0}\"gewünscht", output);
+            }
 
             return new Tuple<Spieß, List<Spieß>>(wunschSpieß, spieße);
         }
