@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BwInf_39_2_2_Spießgesellen {
     class Program {
         static void Main(string[] args) {
-            var tup = readData(7);
+            var tup = readData(6);
             List<Spieß> spieße = tup.Item2;
             Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", tup.Item1.obstSorten));
             Console.WriteLine("\nBEOBACHTETE SPIESSE:");
@@ -111,50 +111,61 @@ namespace BwInf_39_2_2_Spießgesellen {
             wunschSpieß.printSpieß();
 
             if (spießeHalbfalsch.Count > 0) {
-                Console.Write("\nfolgende gewünschte Obssorten konnten nicht zugeordnet werden: ");
-                string output = "\"";
-                for (int i = 0; i < spießeHalbfalsch.Count; i++) {
-                    for (int j = 0; j < spießeHalbfalsch[i].Item1.obstSorten.Count; j++) {
-                        if (!spießeHalbfalsch[i].Item2.Contains(spießeHalbfalsch[i].Item1.obstSorten[j]))
-                            output += spießeHalbfalsch[i].Item1.obstSorten[j] + "\", \"";
-                    }
+                printHalbfalschKurz(spießeHalbfalsch);
+            }
+            
+            return new Tuple<Spieß, List<Spieß>>(wunschSpieß, spieße);
+        }
+
+        /// <summary>
+        /// Ausgabe der teilweise passenden Spieße in Kurzform.
+        /// Bsp.: *rot*Banane Ugli  -> 25 18
+        /// </summary>
+        /// <param name="spießeHalbfalsch">Liste der teilweise richtigen Spieße mit List<string> der ungewünschten Obstsorten</param>
+        public static void printHalbfalschKurz(List<Tuple<Spieß, List<string>>> spießeHalbfalsch) {
+            //spießeHalbfalsch.Sort((tup1, tup2) => ((tup1.Item1.length-tup1.Item2.Count) / tup1.Item1.length).CompareTo((tup2.Item1.length - tup2.Item2.Count) / tup2.Item1.length));//elemente mit einem besseren gewünschteSortenImSpieß zu Spießlänge Verhältnis weiter oben
+            Console.WriteLine();
+            for (int i = 0; i < spießeHalbfalsch.Count; i++) {
+                foreach (string obst in spießeHalbfalsch[i].Item1.obstSorten) {
+                    Console.ForegroundColor = spießeHalbfalsch[i].Item2.Contains(obst) ? ConsoleColor.DarkRed : ConsoleColor.White;
+                    Console.Write(obst + " ");
                 }
-                output = output.Remove(output.Length - 3, 3);
-                output += "\n\n";
-                for (int i = 0; i < spießeHalbfalsch.Count; i++) {
-                    foreach (string sorte in spießeHalbfalsch[i].Item1.obstSorten) {
-                        if (!spießeHalbfalsch[i].Item2.Contains(sorte)) {
-                            output += "\"" + sorte + "\", ";
-                        }
-                    }
-                    output = output.Remove(output.Length - 2, 2);
-                    output += (spießeHalbfalsch[i].Item1.obstSorten.Count - spießeHalbfalsch[i].Item2.Count == 1 ? " ist" : " sind") + " in den Schüsseln ";
-                    output += string.Join(", ", spießeHalbfalsch[i].Item1.schüsseln);
-                    output += spießeHalbfalsch[i].Item2.Count == 1 ? "; in einer der Schüsseln ist die nicht-gewünschte Sorte \"" : "; in mehreren der Schüsseln sind die nicht-gewünschten Sorten \"";
-                    output += string.Join("\", ", spießeHalbfalsch[i].Item2);
-                    output += "\" enthalten \n";
-                }
+                Console.Write(" -> ");
+                foreach (int schüssel in spießeHalbfalsch[i].Item1.schüsseln) { Console.Write(schüssel + " "); }
+                Console.WriteLine();
+            }
+        }
 
-
-
-
-                Console.WriteLine(output);
-                //spießeHalbfalsch.Sort((tup1, tup2) => ((tup1.Item1.length-tup1.Item2.Count) / tup1.Item1.length).CompareTo((tup2.Item1.length - tup2.Item2.Count) / tup2.Item1.length));//elemente mit einem besseren gewünschteSortenImSpieß zu Spießlänge Verhältnis weiter oben
-
-                var query = spießeHalbfalsch.OrderBy(tup1 => (float)tup1.Item1.length / (float)tup1.Item2.Count);//((tup1.Item1.length - tup1.Item2.Count) / tup1.Item1.length));
-                for (int i = 0; i < spießeHalbfalsch.Count; i++) {
-                    foreach (string obst in spießeHalbfalsch[i].Item1.obstSorten) {
-                        Console.ForegroundColor = spießeHalbfalsch[i].Item2.Contains(obst) ? ConsoleColor.DarkRed : ConsoleColor.White;
-                        Console.Write(obst + " ");
-                    }
-                    Console.Write(" -> ");
-                    foreach (int schüssel in spießeHalbfalsch[i].Item1.schüsseln) {
-                        Console.Write(schüssel + " ");
-                    }
-                    Console.WriteLine();
+        /// <summary>
+        /// Ausgabe der teilweise passenden Spieße in ausformulierter Form.
+        /// Bsp.: "Ugli" ist in den Schüsseln 25, 18; in einer der Schüsseln ist die nicht-gewünschte Sorte "Banane" enthalten
+        /// </summary>
+        /// <param name="spießeHalbfalsch">Liste der teilweise richtigen Spieße mit List<string> der ungewünschten Obstsorten</string></param>
+        public static void printHalbfalschWortform(List<Tuple<Spieß, List<string>>> spießeHalbfalsch) {
+            Console.Write("\nfolgende gewünschte Obssorten konnten nicht zugeordnet werden: ");
+            string output = "\"";
+            for (int i = 0; i < spießeHalbfalsch.Count; i++) {
+                for (int j = 0; j < spießeHalbfalsch[i].Item1.obstSorten.Count; j++) {
+                    if (!spießeHalbfalsch[i].Item2.Contains(spießeHalbfalsch[i].Item1.obstSorten[j]))
+                        output += spießeHalbfalsch[i].Item1.obstSorten[j] + "\", \"";
                 }
             }
-            return new Tuple<Spieß, List<Spieß>>(wunschSpieß, spieße);
+            output = output.Remove(output.Length - 3, 3);
+            output += "\n\n";
+            for (int i = 0; i < spießeHalbfalsch.Count; i++) {
+                foreach (string sorte in spießeHalbfalsch[i].Item1.obstSorten) {
+                    if (!spießeHalbfalsch[i].Item2.Contains(sorte)) {
+                        output += "\"" + sorte + "\", ";
+                    }
+                }
+                output = output.Remove(output.Length - 2, 2);
+                output += (spießeHalbfalsch[i].Item1.obstSorten.Count - spießeHalbfalsch[i].Item2.Count == 1 ? " ist" : " sind") + " in den Schüsseln ";
+                output += string.Join(", ", spießeHalbfalsch[i].Item1.schüsseln);
+                output += spießeHalbfalsch[i].Item2.Count == 1 ? "; in einer der Schüsseln ist die nicht-gewünschte Sorte \"" : "; in mehreren der Schüsseln sind die nicht-gewünschten Sorten \"";
+                output += string.Join("\", ", spießeHalbfalsch[i].Item2);
+                output += "\" enthalten \n";
+            }
+            Console.WriteLine(output);
         }
 
         /// <summary>
