@@ -49,7 +49,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                                 }
                             }
                             else if (matrix[x, x] == 0) {
-                                matrix[x, x] = 2;
+                                matrix[x, x] = 1;
                             }
                         }
                     }
