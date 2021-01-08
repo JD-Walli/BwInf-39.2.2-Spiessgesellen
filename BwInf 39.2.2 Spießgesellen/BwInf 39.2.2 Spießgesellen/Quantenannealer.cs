@@ -9,20 +9,22 @@ namespace BwInf_39_2_2_Spießgesellen {
     class Quantenannealer {
         public static Tuple<Spieß, List<Spieß>> quantenannealer(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
             //TODO: nicht immer sind alle Buchstaben des Alphabets vertreten!!!
-            char[] alphabet = { 'a','b','c','d','e','f','g','h','i','j' };//{ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q' };
-            float[,] matrix = new float[gesamtObst*gesamtObst, gesamtObst * gesamtObst];
+            char[] alphabetAllg = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+            char[] alphabet = new char[gesamtObst];
+            Array.Copy(alphabetAllg, alphabet, gesamtObst);
+            float[,] matrix = new float[gesamtObst * gesamtObst, gesamtObst * gesamtObst];
 
             //O(n)= spießeC*gesamtobst³
             /*Fehlerbild:
              nicht alle Schleifen werden vollständig durchlaufen
-             ergo nicht genug -2 werden eingetragen
-             die results sind nur 10 stellen lang, sollten 100 sein*/
+             ergo nicht genug -2 werden eingetragen -> gelöst, nicht valuetype übergabe in program an algo und qa
+             die results sind nur 600 stellen lang, sollten 100 sein
+             falsche Ergebnisse
+             -> Idee: QA zerstört Qubits die nicht gebiased und gekoppelt sind, die ich aber zum decoden brauche (als abstandshalter)*/
             foreach (Spieß spieß in spieße) {
                 for (int sch = 0; sch < spieß.schüsseln.Count; sch++) {
                     for (int sor = 0; sor < spieß.obstSorten.Count; sor++) {
-                        int posInMatrix = (spieß.schüsseln[sch]-1) * gesamtObst + Array.FindIndex(alphabet, c => c == spieß.obstSorten[sor].ToLower().ElementAt(0));
-                        Console.WriteLine(sch+", "+sor+"  :  " + posInMatrix+" = "+ (spieß.schüsseln[sch] - 1) + " * "+ gesamtObst + " + "+ Array.FindIndex(alphabet, c => c == spieß.obstSorten[sor].ToLower().ElementAt(0)));
-                        Console.WriteLine(spieß.obstSorten[sor].ElementAt(0));
+                        int posInMatrix = (spieß.schüsseln[sch] - 1) * gesamtObst + Array.FindIndex(alphabet, c => c == spieß.obstSorten[sor].ToLower().ElementAt(0));
                         matrix[posInMatrix, posInMatrix] += -2;
                     }
                 }
@@ -46,6 +48,9 @@ namespace BwInf_39_2_2_Spießgesellen {
                                     }
                                 }
                             }
+                            else if (matrix[x, x] == 0) {
+                                matrix[x, x] = 2;
+                            }
                         }
                     }
                 }
@@ -53,20 +58,20 @@ namespace BwInf_39_2_2_Spießgesellen {
 
             List<Spieß> returnSpieße = new List<Spieß>();
             int[] solution = new int[gesamtObst]; //index entspricht sorte, value entspricht schüssel
-            for(int i=0;i<solution.Length;i++) {
+            for (int i = 0; i < solution.Length; i++) {
                 solution[i] = -1;
             }
             Matrix.printMatrix(matrix);
             try {
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
-                {"annealing_time","50"},
-                {"num_reads","2000"}, //max 10000 (limitation by dwave)
+                {"annealing_time","200"},
+                {"num_reads","4000"}, //max 10000 (limitation by dwave)
                 //{"chain_strength","2" }
                 };
                 Dictionary<string, string> pyParams = new Dictionary<string, string>() {
                 {"problem_type","qubo"}, //qubo //ising
-                {"dwave_solver", "DW_2000Q_6"}, //DW_2000Q_6 //Advantage_system1.1
-                {"dwave_inspector","false" }
+                {"dwave_solver", "Advantage_system1.1"}, //DW_2000Q_6 //Advantage_system1.1
+                {"dwave_inspector","true" }
                 };
                 Task<qaConstellation> constellationTask = QA_Classification.Program.qaCommunication(matrix, qaArguments, pyParams);
                 qaConstellation constellation = constellationTask.Result;
@@ -90,7 +95,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                 for (int sch = 0; sch < gesamtObst; sch++) {
                     for (int sor = 0; sor < gesamtObst; sor++) {
                         if (result.Item4[sch * gesamtObst + sor] == 1) {
-                            solution[sor] = sch+1;
+                            solution[sor] = sch + 1;
                             returnSpieße.Add(new Spieß(new List<int>() { sch }, new List<string>() { alphabet[sor] + "" }));
                         }
                     }
@@ -102,10 +107,12 @@ namespace BwInf_39_2_2_Spießgesellen {
                 Console.WriteLine(e.StackTrace);
             }
 
-            foreach(string wunschobst in wunschSpieß.obstSorten) {
-                int index = Array.FindIndex(alphabet, c => c == wunschobst.ElementAt(0));
-                if (index == -1) { Console.WriteLine("Es konnte nicht bestimmt werden in welcher Schüssel sich das Obst {0} befindet", wunschobst);break; }
-                wunschSpieß.schüsseln.Add(solution[index]);
+            foreach (string wunschobst in wunschSpieß.obstSorten) {
+                int index = Array.FindIndex(alphabet, c => c == wunschobst.ToLower().ElementAt(0));
+                if (index == -1) { Console.WriteLine("Es konnte nicht bestimmt werden in welcher Schüssel sich das Obst {0} befindet", wunschobst); }
+                else {
+                    wunschSpieß.schüsseln.Add(solution[index]);
+                }
             }
             Console.WriteLine("\nERGEBNIS");
             foreach (Spieß spieß in returnSpieße) {
@@ -114,10 +121,10 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\nWUNSCHSPIESS");
             wunschSpieß.printSpieß();
             Console.WriteLine("\nSOLUTION QANTUM");
-            for (int s=0;s< solution.Length;s++) {
+            for (int s = 0; s < solution.Length; s++) {
                 Console.WriteLine(alphabet[s] + " : " + solution[s]);
             }
-            return new Tuple<Spieß, List<Spieß>>(wunschSpieß,returnSpieße);
+            return new Tuple<Spieß, List<Spieß>>(wunschSpieß, returnSpieße);
         }
     }
 

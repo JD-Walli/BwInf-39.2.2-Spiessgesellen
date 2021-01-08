@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace BwInf_39_2_2_Spießgesellen {
     class Program {
+        [STAThread]
+
         static void Main(string[] args) {
             int dataToLoad = 1;
             var tup = readData(dataToLoad);
@@ -15,10 +17,10 @@ namespace BwInf_39_2_2_Spießgesellen {
             foreach (Spieß spieß in spieße) {
                 spieß.printSpieß();
             }
-            
-            Algorithmus.algorithmus(new Spieß(tup.Item1.schüsseln,tup.Item1.obstSorten), spieße, tup.Item3);
+            Quantenannealer.quantenannealer(new Spieß(tup.Item1.schüsseln, tup.Item1.obstSorten), spieße, tup.Item3);
             tup = readData(dataToLoad);
-            Quantenannealer.quantenannealer(tup.Item1, spieße, tup.Item3);
+            Algorithmus.algorithmus(new Spieß(tup.Item1.schüsseln,tup.Item1.obstSorten), spieße, tup.Item3);
+            
             Console.ReadLine();
         }
 
