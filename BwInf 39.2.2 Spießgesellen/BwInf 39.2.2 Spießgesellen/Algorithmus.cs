@@ -17,6 +17,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         public static Tuple<Spieß, List<Spieß>> algorithmus(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
             #region Spieße aufspalten
             bool didChange = true;
+            int counter = 0;
             while (didChange) {
                 didChange = false;
                 for (int i = 0; i < spieße.Count; i++) {
@@ -31,7 +32,9 @@ namespace BwInf_39_2_2_Spießgesellen {
                         }
                     }
                 }
+                counter++;
             }
+            Console.WriteLine(counter);
             spieße.RemoveAll(sp => sp.length == 0);//laufzeitoptimierung?
             #endregion
 

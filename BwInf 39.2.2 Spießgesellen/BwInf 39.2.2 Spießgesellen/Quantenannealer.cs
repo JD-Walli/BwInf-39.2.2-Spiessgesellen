@@ -13,7 +13,41 @@ namespace BwInf_39_2_2_Spießgesellen {
             char[] alphabet = new char[gesamtObst];
             Array.Copy(alphabetAllg, alphabet, gesamtObst);
             float[,] matrix = new float[gesamtObst * gesamtObst, gesamtObst * gesamtObst];
+            #region gewünschte, unbeobachtete Obstsorten verarbeiten
+            //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
+            //wenn n sorten unbeobachtet und gewünscht und sonst keine, kann TROTZDEM eine Lösung ausgegeben werden
+            int beobachteteSorten = 0;
+            foreach (Spieß sp in spieße) {
+                beobachteteSorten += sp.length;
+            }
+            if (beobachteteSorten != gesamtObst) {
+                //gewünschte Sorten, die nicht beobachtet werden ausfindig machen
+                List<string> unbeobachteteSorten = new List<string>();
+                foreach (string wunschObst in wunschSpieß.obstSorten) {
+                    bool wunschObstBeobachtet = false;
+                    foreach (Spieß sp in spieße) {
+                        if (sp.obstSorten.Contains(wunschObst)) { wunschObstBeobachtet = true; }
+                    }
+                    if (!wunschObstBeobachtet) { unbeobachteteSorten.Add(wunschObst); }
+                }
+                //sollten Sorten weder gewünscht noch beobachtet sein, aber existieren, werden sie als unbekannte Obstsorte hinterlegt
+                for (int i = 0; unbeobachteteSorten.Count < gesamtObst - beobachteteSorten; i++) {
+                    unbeobachteteSorten.Add("unbekannte Obstsorte " + i);
+                }
 
+                //Schüsselnummern, die nicht genannt wurden, aber existieren müssen, werden ausfindig gemacht
+                List<int> unbeobachteteSchüsseln = new List<int>();
+                for (int i = 1; i <= gesamtObst; i++) {
+                    bool schüsselBeobachtet = false;
+                    foreach (Spieß spieß in spieße) {
+                        if (spieß.schüsseln.Contains(i)) { schüsselBeobachtet = true; }
+                    }
+                    if (!schüsselBeobachtet) { unbeobachteteSchüsseln.Add(i); }
+                }
+
+                spieße.Add(new Spieß(unbeobachteteSchüsseln, unbeobachteteSorten));
+            }
+            #endregion
             //O(n)= spießeC*gesamtobst³
             /*Fehlerbild:
              nicht alle Schleifen werden vollständig durchlaufen
@@ -57,21 +91,21 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
 
             List<Spieß> returnSpieße = new List<Spieß>();
-            int[] solution = new int[gesamtObst]; //index entspricht sorte, value entspricht schüssel
-            for (int i = 0; i < solution.Length; i++) {
-                solution[i] = -1;
+            List<int>[] solution = new List<int>[gesamtObst]; //index entspricht sorte, value entspricht schüssel
+            for(int i = 0; i < solution.Length; i++) {
+                solution[i] = new List<int>();
             }
             Matrix.printMatrix(matrix);
             try {
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
                 {"annealing_time","200"},
                 {"num_reads","4000"}, //max 10000 (limitation by dwave)
-                //{"chain_strength","2" }
+                {"chain_strength","3" }
                 };
                 Dictionary<string, string> pyParams = new Dictionary<string, string>() {
                 {"problem_type","qubo"}, //qubo //ising
                 {"dwave_solver", "Advantage_system1.1"}, //DW_2000Q_6 //Advantage_system1.1
-                {"dwave_inspector","true" }
+                {"dwave_inspector","false" }
                 };
                 Task<qaConstellation> constellationTask = QA_Classification.Program.qaCommunication(matrix, qaArguments, pyParams);
                 qaConstellation constellation = constellationTask.Result;
@@ -95,7 +129,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                 for (int sch = 0; sch < gesamtObst; sch++) {
                     for (int sor = 0; sor < gesamtObst; sor++) {
                         if (result.Item4[sch * gesamtObst + sor] == 1) {
-                            solution[sor] = sch + 1;
+                            solution[sor].Add( sch + 1);
                             returnSpieße.Add(new Spieß(new List<int>() { sch }, new List<string>() { alphabet[sor] + "" }));
                         }
                     }
@@ -110,8 +144,8 @@ namespace BwInf_39_2_2_Spießgesellen {
             foreach (string wunschobst in wunschSpieß.obstSorten) {
                 int index = Array.FindIndex(alphabet, c => c == wunschobst.ToLower().ElementAt(0));
                 if (index == -1) { Console.WriteLine("Es konnte nicht bestimmt werden in welcher Schüssel sich das Obst {0} befindet", wunschobst); }
-                else {
-                    wunschSpieß.schüsseln.Add(solution[index]);
+                else{
+                    wunschSpieß.schüsseln.AddRange(solution[index]);
                 }
             }
             Console.WriteLine("\nERGEBNIS");
@@ -122,7 +156,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             wunschSpieß.printSpieß();
             Console.WriteLine("\nSOLUTION QANTUM");
             for (int s = 0; s < solution.Length; s++) {
-                Console.WriteLine(alphabet[s] + " : " + solution[s]);
+                Console.WriteLine(alphabet[s] + " : " + string.Join(",", solution[s]));
             }
             return new Tuple<Spieß, List<Spieß>>(wunschSpieß, returnSpieße);
         }
