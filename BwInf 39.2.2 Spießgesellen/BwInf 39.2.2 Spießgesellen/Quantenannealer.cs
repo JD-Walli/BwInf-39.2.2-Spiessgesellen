@@ -5,10 +5,12 @@ using QA_Classification;
 using System.Text;
 using System.Threading.Tasks;
 
+
+//TODO: bestrafen wenn zwei Felder nicht gleichzeitig besetzt sein dürfen/Zeilen und Spalten rauslöschen die nicht gebraucht werden: wo kein qubit, kann auch keine unerwünschte 1 sein
+//TODO: Matrix tauschen: erst sorten, dann schüssel (macht decoding und andere einfacher zu verstehen)
 namespace BwInf_39_2_2_Spießgesellen {
     class Quantenannealer {
         public static Tuple<Spieß, List<Spieß>> quantenannealer(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
-            //TODO: nicht immer sind alle Buchstaben des Alphabets vertreten!!!
             char[] alphabetAllg = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
             char[] alphabet = new char[gesamtObst];
             Array.Copy(alphabetAllg, alphabet, gesamtObst);
@@ -98,7 +100,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             Matrix.printMatrix(matrix);
             try {
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
-                {"annealing_time","200"},
+                {"annealing_time","2"},
                 {"num_reads","4000"}, //max 10000 (limitation by dwave)
                 {"chain_strength","3" }
                 };
@@ -114,24 +116,28 @@ namespace BwInf_39_2_2_Spießgesellen {
                 //constellation.plotEnergyDistribution();
                 //constellation.saveInputData();
                 //constellation.saveResults();
-                var result = constellation.results[constellation.getHighest(2, constellation.getLowest(1, new List<int>()))[0]];
-                /*
-                 neue Spießliste
-                 gehe durch alle obstsorten
-                 finde alle unterschiede aller gleich guter results, die innerhalb einer sorte sind
-                 -  neues Array kombinierteresults 000000
-                 -  gehe durch alle results    
-                 -       gehe durch jede schüssel und wenn wert==1 setze wert in kombinierteresults auch auf 1
-                 - return Array mit array[position]==1? schüssel[position] gehört zu betrachteter Obstsorte
-                 füge sorte und ALLE möglicherweise dazugehörigen schüsseln (aka return) hinzu 
-                 dadurch kann auch die info einer nicht-eindeutig-zugeordneten Sorte bekommen werden*/
+                var resultCombined = new int[gesamtObst * gesamtObst];
+                var bestResults= constellation.getLowest(1, new List<int>());
 
+                foreach (int index in bestResults) {
+                    for(int i = 0; i < gesamtObst * gesamtObst; i++) {
+                        resultCombined[i] += constellation.results[index].Item4[i];
+                    }
+                }
+                Console.WriteLine(String.Join(" ", resultCombined));
                 for (int sch = 0; sch < gesamtObst; sch++) {
+                    List<int> biggestSorNumIndices = new List<int>() { 0 };
                     for (int sor = 0; sor < gesamtObst; sor++) {
-                        if (result.Item4[sch * gesamtObst + sor] == 1) {
-                            solution[sor].Add( sch + 1);
-                            returnSpieße.Add(new Spieß(new List<int>() { sch }, new List<string>() { alphabet[sor] + "" }));
+                        if (resultCombined[sch * gesamtObst + sor] > resultCombined[sch * gesamtObst + biggestSorNumIndices[0]]) {
+                            biggestSorNumIndices=new List<int>() { sor };
+                        } else if(resultCombined[sch * gesamtObst + sor] == resultCombined[sch * gesamtObst+biggestSorNumIndices[0]]  && resultCombined[sch * gesamtObst + sor]>0  &&  sor>0) {
+                            biggestSorNumIndices.Add(sor);
                         }
+                    }
+                    foreach(int sorte in biggestSorNumIndices) {
+                        Console.WriteLine("=> "+sorte);
+                        solution[sorte].Add(sch + 1);
+                        returnSpieße.Add(new Spieß(new List<int>() { sch+1 }, new List<string>() { alphabet[sorte] + "" }));
                     }
                 }
             }
