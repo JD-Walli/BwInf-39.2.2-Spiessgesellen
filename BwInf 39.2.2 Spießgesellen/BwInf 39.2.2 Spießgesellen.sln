@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1267
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BwInf 39-2-2 Spießgesellen", "BwInf 39.2.2 Spießgesellen\BwInf 39-2-2 Spießgesellen.csproj", "{5FA4AD75-A73C-4465-9C5B-1774A50C3B3C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BwInf 39.2.2 Spießgesellen", "BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen.csproj", "{5FA4AD75-A73C-4465-9C5B-1774A50C3B3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
