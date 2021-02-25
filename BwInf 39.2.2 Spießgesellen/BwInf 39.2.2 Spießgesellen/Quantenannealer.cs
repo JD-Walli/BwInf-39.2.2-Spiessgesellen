@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using QA_Classification;
+using QA_Communication;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -109,10 +109,10 @@ namespace BwInf_39_2_2_Spießgesellen {
                 {"dwave_solver", "Advantage_system1.1"}, //DW_2000Q_6 //Advantage_system1.1
                 {"dwave_inspector","false" }
                 };
-                Task<qaConstellation> constellationTask = QA_Classification.Program.qaCommunication(matrix, qaArguments, pyParams);
+                Task<qaConstellation> constellationTask = QA_Communication.Program.qaCommunication(matrix, qaArguments, pyParams);
                 qaConstellation constellation = constellationTask.Result;
                 constellation.printConstellation(20);
-                QA_Classification.Program.getUserInput(constellation, matrix);
+                QA_Communication.Program.getUserInput(constellation, matrix);
                 //constellation.plotEnergyDistribution();
                 //constellation.saveInputData();
                 //constellation.saveResults();
