@@ -33,7 +33,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// </summary>
         /// <param name="spieß2">Vergleichsspieß</param>
         /// <returns>Tuple von verändertem spieß2 und dem neuen Schnittmengen-Spieß</returns>
-        public Tuple<Spieß,Spieß> vergleicheSpieße(Spieß spieß2) {
+        public (Spieß spieß2neu,Spieß schnittSpieß) vergleicheSpieße(Spieß spieß2) {
             Spieß returnSpieß = new Spieß(new List<int>(),new List<string>());
             //für Laufzeitoptimierung
             /*List<int> fruitsToDelete1 = new List<int>();
@@ -63,7 +63,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
             updateLength();
             spieß2.updateLength();
-            return new Tuple<Spieß, Spieß>(spieß2, returnSpieß);
+            return (spieß2, returnSpieß);
         }
 
         public void updateLength() {

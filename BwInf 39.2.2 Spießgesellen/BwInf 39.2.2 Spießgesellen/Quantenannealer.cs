@@ -10,11 +10,12 @@ using System.Threading.Tasks;
 //TODO: Matrix tauschen: erst sorten, dann schüssel (macht decoding und andere einfacher zu verstehen)
 namespace BwInf_39_2_2_Spießgesellen {
     class Quantenannealer {
-        public static Tuple<Spieß, List<Spieß>> quantenannealer(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
+        public static (Spieß wunschSpieß, List<Spieß> returnSpieße) quantenannealer(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
             char[] alphabetAllg = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
             char[] alphabet = new char[gesamtObst];
             Array.Copy(alphabetAllg, alphabet, gesamtObst);
             float[,] matrix = new float[gesamtObst * gesamtObst, gesamtObst * gesamtObst];
+
             #region gewünschte, unbeobachtete Obstsorten verarbeiten
             //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
             //wenn n sorten unbeobachtet und gewünscht und sonst keine, kann TROTZDEM eine Lösung ausgegeben werden
@@ -84,24 +85,23 @@ namespace BwInf_39_2_2_Spießgesellen {
                                     }
                                 }
                             }
-                            else if (matrix[x, x] == 0) {
-                                matrix[x, x] = 1;
+                            else if (matrix[x, y] == 0) {
+                                //matrix[x, y] = 1;
                             }
                         }
                     }
                 }
             }
+            var emptyCol=findEmptyColumns(matrix);
+            matrix = reduceMatrix(matrix, emptyCol);
 
             List<Spieß> returnSpieße = new List<Spieß>();
             List<int>[] solution = new List<int>[gesamtObst]; //index entspricht sorte, value entspricht schüssel
-            for(int i = 0; i < solution.Length; i++) {
-                solution[i] = new List<int>();
-            }
-            Matrix.printMatrix(matrix);
+            for(int i = 0; i < solution.Length; i++) { solution[i] = new List<int>();  }
             try {
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
-                {"annealing_time","2"},
-                {"num_reads","4000"}, //max 10000 (limitation by dwave)
+                {"annealing_time","20"},
+                {"num_reads","5000"}, //max 10000 (limitation by dwave)
                 {"chain_strength","3" }
                 };
                 Dictionary<string, string> pyParams = new Dictionary<string, string>() {
@@ -116,15 +116,16 @@ namespace BwInf_39_2_2_Spießgesellen {
                 //constellation.plotEnergyDistribution();
                 //constellation.saveInputData();
                 //constellation.saveResults();
-                var resultCombined = new int[gesamtObst * gesamtObst];
+                int[] resultCombined = new int[gesamtObst * gesamtObst];
                 var bestResults= constellation.getLowest(1, new List<int>());
 
                 foreach (int index in bestResults) {
+                    int[] thisExpandedResult = expandResult(constellation.results[index].result, emptyCol);
                     for(int i = 0; i < gesamtObst * gesamtObst; i++) {
-                        resultCombined[i] += constellation.results[index].Item4[i];
+                        resultCombined[i] += thisExpandedResult[i];
                     }
                 }
-                Console.WriteLine(String.Join(" ", resultCombined));
+                Console.WriteLine(string.Join(" ", resultCombined));
                 for (int sch = 0; sch < gesamtObst; sch++) {
                     List<int> biggestSorNumIndices = new List<int>() { 0 };
                     for (int sor = 0; sor < gesamtObst; sor++) {
@@ -135,7 +136,6 @@ namespace BwInf_39_2_2_Spießgesellen {
                         }
                     }
                     foreach(int sorte in biggestSorNumIndices) {
-                        Console.WriteLine("=> "+sorte);
                         solution[sorte].Add(sch + 1);
                         returnSpieße.Add(new Spieß(new List<int>() { sch+1 }, new List<string>() { alphabet[sorte] + "" }));
                     }
@@ -158,13 +158,63 @@ namespace BwInf_39_2_2_Spießgesellen {
             foreach (Spieß spieß in returnSpieße) {
                 spieß.printSpieß();
             }
-            Console.WriteLine("\nWUNSCHSPIESS");
-            wunschSpieß.printSpieß();
             Console.WriteLine("\nSOLUTION QANTUM");
             for (int s = 0; s < solution.Length; s++) {
                 Console.WriteLine(alphabet[s] + " : " + string.Join(",", solution[s]));
             }
-            return new Tuple<Spieß, List<Spieß>>(wunschSpieß, returnSpieße);
+            Console.WriteLine("\nWUNSCHSPIESS");
+            wunschSpieß.printSpieß();
+
+            return (wunschSpieß, returnSpieße);
+        }
+
+        static List<int> findEmptyColumns(float[,] matrix) {
+            List<int> emptyColumns = new List<int>();
+            for(int i = 0; i < matrix.GetLength(0); i++) {
+                bool columnEmpty = true;
+                for (int j = 0; j < matrix.GetLength(1); j++) {
+                    if (matrix[i, j] != 0) {
+                        columnEmpty = false;
+                        break;
+                    }
+                }
+                if (columnEmpty) {
+                    emptyColumns.Add(i);
+                }
+            }
+            return emptyColumns;
+        }
+
+        static float[,] reduceMatrix(float[,] matrix, List<int> emptyColumns) {
+            int newLenght = matrix.GetLength(0) - emptyColumns.Count;
+            float[,] newMatrix = new float[newLenght, newLenght];
+
+            int countX=0, countY = 0;
+            for( int i=0; i < matrix.GetLength(1); i++) {
+                if (!emptyColumns.Contains(i)) {
+                    for (int j = 0; j < matrix.GetLength(0); j++) {
+                        if (!emptyColumns.Contains(j)) {
+                            newMatrix[countX, countY] = matrix[i, j];
+                            countX++;
+                        }
+                    }
+                    countY++;
+                    countX = 0;
+                }
+            }
+            return newMatrix;
+        }
+
+        static int[] expandResult(int[] result, List<int> emptyColumns) {
+            int[] newResult = new int[result.Length+emptyColumns.Count];
+            int newPosDiff = 0;
+            for( int i = 0; i < newResult.Length; i++) {
+                if (!emptyColumns.Contains(i)) {
+                    newResult[i] = result[i - newPosDiff];
+                }
+                else { newResult[i] = 0; newPosDiff++; }
+            }
+            return newResult;
         }
     }
 
