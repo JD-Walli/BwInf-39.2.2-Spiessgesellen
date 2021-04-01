@@ -9,7 +9,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         [STAThread]
 
         static void Main(string[] args) {
-            int dataToLoad = 1;
+            int dataToLoad = 5;
             (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(dataToLoad);
             Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", wunschSpieß.obstSorten));
             Console.WriteLine("\nBEOBACHTETE SPIESSE:");
@@ -19,10 +19,14 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\nQUANTENCOMPUTER:");
             //Quantenannealer.quantenannealer(new Spieß(wunschSpieß.schüsseln, wunschSpieß.obstSorten), spieße, gesamtObst);
             Console.WriteLine("\n\n\n");
-            Console.WriteLine("\nALGORITHMUS:");
+            Console.WriteLine("\nALGORITHMUS 1:");
             (Spieß wunschSpieß2, List<Spieß> spieße2, int gesamtObst2) = readData(dataToLoad);
             Algorithmus.algorithmus1(new Spieß(wunschSpieß2.schüsseln,wunschSpieß2.obstSorten), spieße2, gesamtObst2);
-            
+
+            Console.WriteLine("\nALGORITHMUS 2:");
+            (Spieß wunschSpieß3, List<Spieß> spieße3, int gesamtObst3) = readData(dataToLoad);
+            Algorithmus.algorithmus2(new Spieß(wunschSpieß3.schüsseln, wunschSpieß3.obstSorten), spieße3, gesamtObst3);
+
             Console.ReadLine();
         }
 

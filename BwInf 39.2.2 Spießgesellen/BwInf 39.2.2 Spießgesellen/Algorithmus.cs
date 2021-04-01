@@ -15,9 +15,9 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// <param name="gesamtObst">anzahl aller Obstsorten</param>
         /// <returns></returns>
         public static (Spieß wunschSpieß, List<Spieß> spieße) algorithmus1(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
-            spieße = spießeAufspalten2(spieße, gesamtObst);
+            spieße = spießeAufspalten(spieße);
 
-            spieße = unbeobachtetesObstsortenFinden(spieße, wunschSpieß, gesamtObst);
+            spieße = unbeobachteteObstsortenFinden(spieße, wunschSpieß, gesamtObst);
 
             (Spieß wunschSpießNew, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) = wunschspießZusammensetzen(spieße, wunschSpieß);
             wunschSpieß = wunschSpießNew;
@@ -37,9 +37,9 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// <param name="gesamtObst">anzahl aller Obstsorten</param>
         /// <returns></returns>
         public static (Spieß wunschSpieß, List<Spieß> spieße) algorithmus2(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
-            spieße = spießeAufspalten(spieße);
+            spieße = spießeAufspalten2(spieße,gesamtObst);
 
-            spieße = unbeobachtetesObstsortenFinden(spieße, wunschSpieß, gesamtObst);
+            spieße = unbeobachteteObstsortenFinden(spieße, wunschSpieß, gesamtObst);
 
             (Spieß wunschSpießNew, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) = wunschspießZusammensetzen(spieße, wunschSpieß);
             wunschSpieß = wunschSpießNew;
@@ -109,12 +109,13 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\nWUNSCHSPIESS:");
             wunschSpieß.printSpieß();
 
+            Console.WriteLine("\nTEILWEISE PASSENDE:");
             if (spießeHalbfalsch.Count > 0) {
                 printHalbfalschKurz(spießeHalbfalsch);
             }
         }
 
-
+        // O(n)=x*spieße^2
         static List<Spieß> spießeAufspalten(List<Spieß> spieße) {
             bool didChange = true;
             int counter = 0;
@@ -139,7 +140,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             return spieße;
         }
 
-
+        //O(n)= spieße^2 + gesamtObst^3 + spieße+schüsseln*sorten
         static List<Spieß> spießeAufspalten2(List<Spieß> spieße, int gesamtObst) {
             Dictionary<char, int> alphabet = new Dictionary<char, int>();
             char[] alphabetAllg = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
@@ -150,11 +151,10 @@ namespace BwInf_39_2_2_Spießgesellen {
                 foreach (int schüssel in sp.schüsseln) {
                     foreach (string sorte in sp.obstSorten) {
                         überschneidungsTabelle[alphabet[sorte.ToLower()[0]], schüssel - 1]++;
-                        Console.WriteLine("{0} {1} : ++", alphabet[sorte.ToLower()[0]], schüssel - 1);
                     }
                 }
             }
-            //TODO: Debuggen (Zeilen Spalten Summe geht nicht); aufräumen (kommentieren, varnamen (i,j) )
+            //TODO: aufräumen (kommentieren, varnamen (i,j) )
             //zusammenrechnen der Reihen und Spalten der Überschneidungstabelle
             List<int>[] spalten = new List<int>[gesamtObst];
             List<int>[] reihen = new List<int>[gesamtObst];
@@ -164,7 +164,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                 for (int j = 0; j < gesamtObst; j++) {
                     if (überschneidungsTabelle[i, j] > highestVal && überschneidungsTabelle[i, j] > 0) {
                         highestVal = überschneidungsTabelle[i, j];
-                        spalten[i] = new List<int>(j);
+                        spalten[i] = new List<int>() { j };
                     }
                     else if (überschneidungsTabelle[i, j] == highestVal) {
                         spalten[i].Add(j);
@@ -172,45 +172,46 @@ namespace BwInf_39_2_2_Spießgesellen {
                 }
             }
             for (int i = 0; i < gesamtObst; i++) {
-                int highestVal = 0;
+                int highestVal = -1;
                 for (int j = 0; j < gesamtObst; j++) {
                     if (überschneidungsTabelle[j, i] > highestVal && überschneidungsTabelle[j, i] > 0) {
                         highestVal = überschneidungsTabelle[j, i];
-                        reihen[i] = new List<int>(j);
+                        reihen[i] = new List<int>() { j };
                     }
                     else if (überschneidungsTabelle[j, i] == highestVal) {
                         reihen[i].Add(j);
                     }
                 }
             }
-
-            Console.WriteLine(spalten[2].Count);
-            for (int i = 0; i < gesamtObst; i++) {
-                for (int j = 0; j < gesamtObst; j++) {
-                    Console.Write(überschneidungsTabelle[j, i] + " ");
-                }
-                for (int j = 0; j < reihen[i].Count; j++) {
-                    Console.Write(" " + reihen[i][j]);
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-            for (int i = 0; i < gesamtObst; i++) {
-                Console.Write(string.Join(spalten[i] + "", " "));
-            }
+            
 
             List<Spieß> newSpieße = new List<Spieß>();
             for (int sp = 0; sp < gesamtObst; sp++) {
                 Spieß intersectionSpieß = new Spieß(new List<int>(), new List<string>());
-                for (int re = 0; re < gesamtObst; re++) {
+                foreach (int re in spalten[sp]) {
                     if (reihen[re].Contains(sp)) {
                         intersectionSpieß.schüsseln.Add(re + 1);
-                        intersectionSpieß.obstSorten.Add(alphabetAllg[sp] + "");
-                        intersectionSpieß.updateLength();
                     }
                 }
-                if (intersectionSpieß.obstSorten.Count > 0) {
-                    newSpieße.Add(intersectionSpieß);
+                if (intersectionSpieß.schüsseln.Count > 0) {
+                    intersectionSpieß.obstSorten.Add(alphabetAllg[sp] + "");
+                    intersectionSpieß.updateLength();
+                    if (intersectionSpieß.schüsseln.Count != intersectionSpieß.obstSorten.Count) {
+                        bool foundPair = false;
+                        foreach (Spieß spieß in newSpieße) {
+                            if (spieß.schüsseln.Intersect(intersectionSpieß.schüsseln).ToList().Count == intersectionSpieß.schüsseln.Count) {
+                                foundPair = true;
+                                spieß.obstSorten.AddRange(intersectionSpieß.obstSorten);
+                                spieß.updateLength();
+                            }
+                        }
+                        if (foundPair == false) {
+                            newSpieße.Add(intersectionSpieß);
+                        }
+                    }
+                    else {
+                        newSpieße.Add(intersectionSpieß);
+                    }
                 }
             }
             return newSpieße;
@@ -220,10 +221,12 @@ namespace BwInf_39_2_2_Spießgesellen {
         static (Spieß wunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) wunschspießZusammensetzen(List<Spieß> spieße, Spieß wunschSpieß) {
             //wenn ganzer Spieß in wunschSpieß enthalten ist, werden Spieß.schüsseln zu wunschSpieß.schüsseln hinzugefügt
             List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch = new List<(Spieß spieß, List<string> unpassendeSorten)>(); //Spieß und nummern der falschen Sorten
+            char[] wunschObstChar = new char[wunschSpieß.obstSorten.Count];
+            for (int i = 0;i < wunschObstChar.Length;i++) { wunschObstChar[i] = wunschSpieß.obstSorten[i].ToLower()[0]; }
             foreach (Spieß spieß in spieße) {
                 List<string> unpassendeSorten = new List<string>();
                 foreach (string obst in spieß.obstSorten) {
-                    if (!wunschSpieß.obstSorten.Contains(obst)) {
+                    if (!wunschObstChar.Contains(obst.ToLower()[0])) {
                         unpassendeSorten.Add(obst);
                     }
                 }
@@ -237,7 +240,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             return (wunschSpieß, spießeHalbfalsch);
         }
 
-        static List<Spieß> unbeobachtetesObstsortenFinden(List<Spieß> spieße, Spieß wunschSpieß, int gesamtObst) {
+        static List<Spieß> unbeobachteteObstsortenFinden(List<Spieß> spieße, Spieß wunschSpieß, int gesamtObst) {
             //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
             //wenn n sorten unbeobachtet und gewünscht und sonst keine, kann TROTZDEM eine Lösung ausgegeben werden
             int beobachteteSorten = 0;
@@ -245,12 +248,12 @@ namespace BwInf_39_2_2_Spießgesellen {
                 beobachteteSorten += sp.length;
             }
             if (beobachteteSorten != gesamtObst) {
-                //gewünschte Sorten, die nicht beobachtet werden ausfindig machen
+                //gewünschte Sorten, die nicht beobachtet wurden ausfindig machen
                 List<string> unbeobachteteSorten = new List<string>();
                 foreach (string wunschObst in wunschSpieß.obstSorten) {
                     bool wunschObstBeobachtet = false;
                     foreach (Spieß sp in spieße) {
-                        if (sp.obstSorten.Contains(wunschObst)) { wunschObstBeobachtet = true; break; }
+                        if (sp.obstSorten.Contains(wunschObst.ToLower()[0]+"") || sp.obstSorten.Contains(wunschObst)) { wunschObstBeobachtet = true; break; }
                     }
                     if (!wunschObstBeobachtet) { unbeobachteteSorten.Add(wunschObst); }
                 }
