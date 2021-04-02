@@ -9,56 +9,27 @@ using System.Threading.Tasks;
 //TODO: bestrafen wenn zwei Felder nicht gleichzeitig besetzt sein dürfen/Zeilen und Spalten rauslöschen die nicht gebraucht werden: wo kein qubit, kann auch keine unerwünschte 1 sein
 //TODO: Matrix tauschen: erst sorten, dann schüssel (macht decoding und andere einfacher zu verstehen)
 namespace BwInf_39_2_2_Spießgesellen {
-    class Quantenannealer {
-        public static (Spieß wunschSpieß, List<Spieß> returnSpieße) quantenannealer(Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) {
+    class Quantenannealer : basisAlgorithmus{
+
+        public Quantenannealer(Spieß orgWunschSpieß, List<Spieß> orgSpieße, int gesamtObst) : base(orgWunschSpieß, orgSpieße, gesamtObst) {
+            this.orgWunschSpieß = orgWunschSpieß;
+            this.orgSpieße = orgSpieße;
+            this.gesamtObst = gesamtObst;
+        }
+
+        public (Spieß wunschSpieß, List<Spieß> newSpieße) quantenannealer() {
             char[] alphabetAllg = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
             char[] alphabet = new char[gesamtObst];
             Array.Copy(alphabetAllg, alphabet, gesamtObst);
             float[,] matrix = new float[gesamtObst * gesamtObst, gesamtObst * gesamtObst];
+            List<Spieß> newSpieße = new List<Spieß>();
+            foreach (Spieß sp in orgSpieße) { newSpieße.Add(sp.clone()); }
 
             #region gewünschte, unbeobachtete Obstsorten verarbeiten
-            //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
-            //wenn n sorten unbeobachtet und gewünscht und sonst keine, kann TROTZDEM eine Lösung ausgegeben werden
-            int beobachteteSorten = 0;
-            foreach (Spieß sp in spieße) {
-                beobachteteSorten += sp.length;
-            }
-            if (beobachteteSorten != gesamtObst) {
-                //gewünschte Sorten, die nicht beobachtet werden ausfindig machen
-                List<string> unbeobachteteSorten = new List<string>();
-                foreach (string wunschObst in wunschSpieß.obstSorten) {
-                    bool wunschObstBeobachtet = false;
-                    foreach (Spieß sp in spieße) {
-                        if (sp.obstSorten.Contains(wunschObst)) { wunschObstBeobachtet = true; }
-                    }
-                    if (!wunschObstBeobachtet) { unbeobachteteSorten.Add(wunschObst); }
-                }
-                //sollten Sorten weder gewünscht noch beobachtet sein, aber existieren, werden sie als unbekannte Obstsorte hinterlegt
-                for (int i = 0; unbeobachteteSorten.Count < gesamtObst - beobachteteSorten; i++) {
-                    unbeobachteteSorten.Add("unbekannte Obstsorte " + i);
-                }
-
-                //Schüsselnummern, die nicht genannt wurden, aber existieren müssen, werden ausfindig gemacht
-                List<int> unbeobachteteSchüsseln = new List<int>();
-                for (int i = 1; i <= gesamtObst; i++) {
-                    bool schüsselBeobachtet = false;
-                    foreach (Spieß spieß in spieße) {
-                        if (spieß.schüsseln.Contains(i)) { schüsselBeobachtet = true; }
-                    }
-                    if (!schüsselBeobachtet) { unbeobachteteSchüsseln.Add(i); }
-                }
-
-                spieße.Add(new Spieß(unbeobachteteSchüsseln, unbeobachteteSorten));
-            }
+            newSpieße = unbeobachteteObstsortenFinden(newSpieße);
             #endregion
             //O(n)= spießeC*gesamtobst³
-            /*Fehlerbild:
-             nicht alle Schleifen werden vollständig durchlaufen
-             ergo nicht genug -2 werden eingetragen -> gelöst, nicht valuetype übergabe in program an algo und qa
-             die results sind nur 600 stellen lang, sollten 100 sein
-             falsche Ergebnisse
-             -> Idee: QA zerstört Qubits die nicht gebiased und gekoppelt sind, die ich aber zum decoden brauche (als abstandshalter)*/
-            foreach (Spieß spieß in spieße) {
+            foreach (Spieß spieß in newSpieße) {
                 for (int sch = 0; sch < spieß.schüsseln.Count; sch++) {
                     for (int sor = 0; sor < spieß.obstSorten.Count; sor++) {
                         int posInMatrix = (spieß.schüsseln[sch] - 1) * gesamtObst + Array.FindIndex(alphabet, c => c == spieß.obstSorten[sor].ToLower().ElementAt(0));
@@ -92,12 +63,10 @@ namespace BwInf_39_2_2_Spießgesellen {
                     }
                 }
             }
-            var emptyCol=findEmptyColumns(matrix);
+            List<int> emptyCol= findEmptyColumns(matrix);
             matrix = reduceMatrix(matrix, emptyCol);
 
-            List<Spieß> returnSpieße = new List<Spieß>();
-            List<int>[] solution = new List<int>[gesamtObst]; //index entspricht sorte, value entspricht schüssel
-            for(int i = 0; i < solution.Length; i++) { solution[i] = new List<int>();  }
+            List<int>[] solution = new List<int>[gesamtObst];
             try {
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
                 {"annealing_time","20"},
@@ -116,30 +85,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                 //constellation.plotEnergyDistribution();
                 //constellation.saveInputData();
                 //constellation.saveResults();
-                int[] resultCombined = new int[gesamtObst * gesamtObst];
-                var bestResults= constellation.getLowest(1, new List<int>());
-
-                foreach (int index in bestResults) {
-                    int[] thisExpandedResult = expandResult(constellation.results[index].result, emptyCol);
-                    for(int i = 0; i < gesamtObst * gesamtObst; i++) {
-                        resultCombined[i] += thisExpandedResult[i];
-                    }
-                }
-                Console.WriteLine(string.Join(" ", resultCombined));
-                for (int sch = 0; sch < gesamtObst; sch++) {
-                    List<int> biggestSorNumIndices = new List<int>() { 0 };
-                    for (int sor = 0; sor < gesamtObst; sor++) {
-                        if (resultCombined[sch * gesamtObst + sor] > resultCombined[sch * gesamtObst + biggestSorNumIndices[0]]) {
-                            biggestSorNumIndices=new List<int>() { sor };
-                        } else if(resultCombined[sch * gesamtObst + sor] == resultCombined[sch * gesamtObst+biggestSorNumIndices[0]]  && resultCombined[sch * gesamtObst + sor]>0  &&  sor>0) {
-                            biggestSorNumIndices.Add(sor);
-                        }
-                    }
-                    foreach(int sorte in biggestSorNumIndices) {
-                        solution[sorte].Add(sch + 1);
-                        returnSpieße.Add(new Spieß(new List<int>() { sch+1 }, new List<string>() { alphabet[sorte] + "" }));
-                    }
-                }
+                (newSpieße, solution) = decodeQCResult(constellation, emptyCol, alphabet);
             }
             catch (Exception e) {
                 Console.WriteLine("\nERROR occured:");
@@ -147,28 +93,19 @@ namespace BwInf_39_2_2_Spießgesellen {
                 Console.WriteLine(e.StackTrace);
             }
 
-            foreach (string wunschobst in wunschSpieß.obstSorten) {
-                int index = Array.FindIndex(alphabet, c => c == wunschobst.ToLower().ElementAt(0));
-                if (index == -1) { Console.WriteLine("Es konnte nicht bestimmt werden in welcher Schüssel sich das Obst {0} befindet", wunschobst); }
-                else{
-                    wunschSpieß.schüsseln.AddRange(solution[index]);
-                }
-            }
-            Console.WriteLine("\nERGEBNIS");
-            foreach (Spieß spieß in returnSpieße) {
-                spieß.printSpieß();
-            }
+            (Spieß newWunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) = wunschspießZusammensetzen(newSpieße);
+            
             Console.WriteLine("\nSOLUTION QANTUM");
             for (int s = 0; s < solution.Length; s++) {
                 Console.WriteLine(alphabet[s] + " : " + string.Join(",", solution[s]));
             }
             Console.WriteLine("\nWUNSCHSPIESS");
-            wunschSpieß.printSpieß();
+            newWunschSpieß.printSpieß();
 
-            return (wunschSpieß, returnSpieße);
+            return (newWunschSpieß, newSpieße);
         }
 
-        static List<int> findEmptyColumns(float[,] matrix) {
+        List<int> findEmptyColumns(float[,] matrix) {
             List<int> emptyColumns = new List<int>();
             for(int i = 0; i < matrix.GetLength(0); i++) {
                 bool columnEmpty = true;
@@ -185,7 +122,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             return emptyColumns;
         }
 
-        static float[,] reduceMatrix(float[,] matrix, List<int> emptyColumns) {
+        float[,] reduceMatrix(float[,] matrix, List<int> emptyColumns) {
             int newLenght = matrix.GetLength(0) - emptyColumns.Count;
             float[,] newMatrix = new float[newLenght, newLenght];
 
@@ -205,7 +142,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             return newMatrix;
         }
 
-        static int[] expandResult(int[] result, List<int> emptyColumns) {
+        int[] expandResult(int[] result, List<int> emptyColumns) {
             int[] newResult = new int[result.Length+emptyColumns.Count];
             int newPosDiff = 0;
             for( int i = 0; i < newResult.Length; i++) {
@@ -215,6 +152,38 @@ namespace BwInf_39_2_2_Spießgesellen {
                 else { newResult[i] = 0; newPosDiff++; }
             }
             return newResult;
+        }
+
+        (List<Spieß> returnSpieße, List<int>[] solution) decodeQCResult(qaConstellation constellation, List<int> emptyCol, char[] alphabet) {
+            List<int>[] solution = new List<int>[gesamtObst]; //index entspricht sorte, value entspricht schüssel
+            for (int i = 0; i < solution.Length; i++) { solution[i] = new List<int>(); }
+            List<Spieß> returnSpieße = new List<Spieß>();
+
+            int[] resultCombined = new int[gesamtObst * gesamtObst];
+            var bestResults = constellation.getLowest(1, new List<int>());
+
+            foreach (int index in bestResults) {
+                int[] thisExpandedResult = expandResult(constellation.results[index].result, emptyCol);
+                for (int i = 0; i < gesamtObst * gesamtObst; i++) {
+                    resultCombined[i] += thisExpandedResult[i];
+                }
+            }
+            for (int sch = 0; sch < gesamtObst; sch++) {
+                List<int> biggestSorNumIndices = new List<int>() { 0 };
+                for (int sor = 0; sor < gesamtObst; sor++) {
+                    if (resultCombined[sch * gesamtObst + sor] > resultCombined[sch * gesamtObst + biggestSorNumIndices[0]]) {
+                        biggestSorNumIndices = new List<int>() { sor };
+                    }
+                    else if (resultCombined[sch * gesamtObst + sor] == resultCombined[sch * gesamtObst + biggestSorNumIndices[0]] && resultCombined[sch * gesamtObst + sor] > 0 && sor > 0) {
+                        biggestSorNumIndices.Add(sor);
+                    }
+                }
+                foreach (int sorte in biggestSorNumIndices) {
+                    solution[sorte].Add(sch + 1);
+                    returnSpieße.Add(new Spieß(new List<int>() { sch + 1 }, new List<string>() { alphabet[sorte] + "" }));
+                }
+            }
+            return (returnSpieße, solution);
         }
     }
 

@@ -25,7 +25,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         }
 
         public Spieß clone() {
-            return new Spieß(schüsseln, obstSorten);
+            return new Spieß(schüsseln.ToList(), obstSorten.ToList());
         }
         /// <summary>
         /// compares 2 Spieße; erstellt neuen Spieß mit Schnittmenge von schüsseln und obstSorten; entfernt Schnittmenge aus Ursprungsspießen
