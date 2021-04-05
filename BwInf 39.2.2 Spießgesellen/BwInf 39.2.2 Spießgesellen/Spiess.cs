@@ -55,6 +55,12 @@ namespace BwInf_39_2_2_Spießgesellen {
                 }
             }
             returnSpieß.updateLength();
+            if (returnSpieß.schüsseln.Count != returnSpieß.obstSorten.Count) {
+                Console.WriteLine("invalid data (amount of overlap between two Spieße not equal in schüsseln and obstSorten)");
+                printSpieß(); spieß2.printSpieß();
+                Console.WriteLine("exit...");
+                Console.ReadKey();
+            }
             for(int i = 0; i < returnSpieß.length;i++) {
                 schüsseln.Remove(returnSpieß.schüsseln[i]);
                 spieß2.schüsseln.Remove(returnSpieß.schüsseln[i]);

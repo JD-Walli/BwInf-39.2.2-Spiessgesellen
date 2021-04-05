@@ -13,22 +13,24 @@ namespace BwInf_39_2_2_Spießgesellen {
             (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(dataToLoad);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
 
+            if (!validateData(wunschSpieß, spieße)) { return; }
+
             Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", wunschSpieß.obstSorten));
             Console.WriteLine("\nBEOBACHTETE SPIESSE:");
             foreach (Spieß spieß in spieße) {
                 spieß.printSpieß();
             }
-
-            Console.WriteLine("\nQUANTENCOMPUTER:");
-            new Quantenannealer(wunschSpieß, spieße, gesamtObst).quantenannealer();
-            Console.WriteLine("\n\n\n");
-
+            
             Console.WriteLine("\nALGORITHMUS 1:");
             new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus1();
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nALGORITHMUS 2:");
             new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus2();
+            Console.WriteLine("\n\n\n");
+
+            Console.WriteLine("\nQUANTENCOMPUTER:");
+            new Quantenannealer(wunschSpieß, spieße, gesamtObst).quantenannealer();
 
             Console.ReadLine();
         }
@@ -48,6 +50,54 @@ namespace BwInf_39_2_2_Spießgesellen {
                 spieße.Add(new Spieß(lines[i].Trim().Split(' ').ToList(), lines[i + 1].Trim().Split(' ').ToList()));
             }
             return (wunschspieß, spieße, int.Parse(lines[0].Trim()));
+        }
+
+        public static bool validateData(Spieß wunschSpieß, List<Spieß> spieße) {
+            bool valid = true;
+            foreach (Spieß sp in spieße) {
+                if (sp.schüsseln.Count != sp.obstSorten.Count) {
+                    valid = false;
+                    Console.WriteLine("invalid data (schüsseln.Count!=obstSorten.Count):");
+                    sp.printSpieß();
+                }
+            }
+            foreach (Spieß sp in spieße) {
+                for (int i = 0; i < sp.schüsseln.Count; i++) {
+                    for (int j = i; j < sp.schüsseln.Count; j++) {
+                        if (i != j) {
+                            if (sp.schüsseln[i] == sp.schüsseln[j]) {
+                                Console.WriteLine("invalid data (same value multiple times):");
+                                valid = false;
+                                sp.printSpieß();
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < wunschSpieß.obstSorten.Count; i++) {
+                for (int j = 0; j < wunschSpieß.obstSorten.Count; j++) {
+                    if (i != j) {
+                        if (wunschSpieß.obstSorten[i] == wunschSpieß.obstSorten[j]) {
+                            Console.WriteLine("invalid data (wunschSpieß same obstsorte multiple times):");
+                            valid = false;
+                            wunschSpieß.printSpieß();
+                        }
+                    }
+                }
+            }
+            if (valid) {
+                Console.WriteLine("data is valid!");
+                return true;
+            }
+            else {
+                Console.Write("proceed (p) or exit (e) program?");
+                var key = Console.ReadKey();
+                if (key.Key.ToString() == "P") {
+                    return true;
+                }
+                Console.WriteLine("\n\n");
+            }
+            return false;
         }
     }
 }

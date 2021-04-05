@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 //TODO: bestrafen wenn zwei Felder nicht gleichzeitig besetzt sein dürfen/Zeilen und Spalten rauslöschen die nicht gebraucht werden: wo kein qubit, kann auch keine unerwünschte 1 sein
 //TODO: Matrix tauschen: erst sorten, dann schüssel (macht decoding und andere einfacher zu verstehen)
 namespace BwInf_39_2_2_Spießgesellen {
-    class Quantenannealer : basisAlgorithmus{
+    class Quantenannealer : basisAlgorithmus {
 
         public Quantenannealer(Spieß orgWunschSpieß, List<Spieß> orgSpieße, int gesamtObst) : base(orgWunschSpieß, orgSpieße, gesamtObst) {
             this.orgWunschSpieß = orgWunschSpieß;
@@ -63,7 +63,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                     }
                 }
             }
-            List<int> emptyCol= findEmptyColumns(matrix);
+            List<int> emptyCol = findEmptyColumns(matrix);
             matrix = reduceMatrix(matrix, emptyCol);
 
             List<int>[] solution = new List<int>[gesamtObst];
@@ -86,28 +86,29 @@ namespace BwInf_39_2_2_Spießgesellen {
                 //constellation.saveInputData();
                 //constellation.saveResults();
                 (newSpieße, solution) = decodeQCResult(constellation, emptyCol, alphabet);
+
+                (Spieß newWunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) = wunschspießZusammensetzen(newSpieße);
+
+                Console.WriteLine("\nSOLUTION QANTUM");
+                for (int s = 0; s < solution.Length; s++) {
+                    Console.WriteLine(alphabet[s] + " : " + string.Join(",", solution[s]));
+                }
+                Console.WriteLine("\nWUNSCHSPIESS");
+                newWunschSpieß.printSpieß();
+                return (newWunschSpieß, newSpieße);
+
             }
             catch (Exception e) {
                 Console.WriteLine("\nERROR occured:");
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
+                return (orgWunschSpieß, orgSpieße);
             }
-
-            (Spieß newWunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) = wunschspießZusammensetzen(newSpieße);
-            
-            Console.WriteLine("\nSOLUTION QANTUM");
-            for (int s = 0; s < solution.Length; s++) {
-                Console.WriteLine(alphabet[s] + " : " + string.Join(",", solution[s]));
-            }
-            Console.WriteLine("\nWUNSCHSPIESS");
-            newWunschSpieß.printSpieß();
-
-            return (newWunschSpieß, newSpieße);
         }
 
         List<int> findEmptyColumns(float[,] matrix) {
             List<int> emptyColumns = new List<int>();
-            for(int i = 0; i < matrix.GetLength(0); i++) {
+            for (int i = 0; i < matrix.GetLength(0); i++) {
                 bool columnEmpty = true;
                 for (int j = 0; j < matrix.GetLength(1); j++) {
                     if (matrix[i, j] != 0) {
@@ -126,8 +127,8 @@ namespace BwInf_39_2_2_Spießgesellen {
             int newLenght = matrix.GetLength(0) - emptyColumns.Count;
             float[,] newMatrix = new float[newLenght, newLenght];
 
-            int countX=0, countY = 0;
-            for( int i=0; i < matrix.GetLength(1); i++) {
+            int countX = 0, countY = 0;
+            for (int i = 0; i < matrix.GetLength(1); i++) {
                 if (!emptyColumns.Contains(i)) {
                     for (int j = 0; j < matrix.GetLength(0); j++) {
                         if (!emptyColumns.Contains(j)) {
@@ -143,9 +144,9 @@ namespace BwInf_39_2_2_Spießgesellen {
         }
 
         int[] expandResult(int[] result, List<int> emptyColumns) {
-            int[] newResult = new int[result.Length+emptyColumns.Count];
+            int[] newResult = new int[result.Length + emptyColumns.Count];
             int newPosDiff = 0;
-            for( int i = 0; i < newResult.Length; i++) {
+            for (int i = 0; i < newResult.Length; i++) {
                 if (!emptyColumns.Contains(i)) {
                     newResult[i] = result[i - newPosDiff];
                 }
