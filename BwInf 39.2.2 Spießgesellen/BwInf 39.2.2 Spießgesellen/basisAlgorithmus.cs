@@ -64,7 +64,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         protected (Spieß wunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) wunschspießZusammensetzen(List<Spieß> spieße) {
             List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch = new List<(Spieß spieß, List<string> unpassendeSorten)>(); //Spieße mit nur teils gewünschten Obstsorten
             Spieß wunschSpieß = orgWunschSpieß.clone();
-            char[] wunschObstChar = new char[wunschSpieß.obstSorten.Count];
+            char[] wunschObstChar = new char[wunschSpieß.obstSorten.Count]; //flexibler mit chars statt strings (notwendig für Quantenannealer)
             for (int i = 0; i < wunschObstChar.Length; i++) { wunschObstChar[i] = wunschSpieß.obstSorten[i].ToLower()[0]; }
 
             foreach (Spieß spieß in spieße) {

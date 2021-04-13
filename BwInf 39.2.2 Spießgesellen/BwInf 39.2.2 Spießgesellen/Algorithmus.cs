@@ -68,10 +68,6 @@ namespace BwInf_39_2_2_Spießgesellen {
          * So kann man möglichst reduzierte Spieße erzeugen, die wiederum zum Wunschspieß zusammengesetzt werden können.
          * */
         List<Spieß> spießeAufspalten(List<Spieß> spieße) {
-            bool didChange = true;
-            int counter = 0;
-            while (didChange) {
-                didChange = false;
                 for (int i = 0; i < spieße.Count; i++) {
                     for (int j = i; j < spieße.Count; j++) {
                         if (i != j) {
@@ -79,14 +75,10 @@ namespace BwInf_39_2_2_Spießgesellen {
                             if (schnittSpieß.length > 0) {
                                 spieße[j] = spieß2neu;
                                 spieße.Add(schnittSpieß);
-                                didChange = true;
                             }
                         }
                     }
                 }
-                counter++;
-            }
-            Console.WriteLine(counter);
             spieße.RemoveAll(sp => sp.length == 0);//laufzeitoptimierung?
             return spieße;
         }

@@ -29,6 +29,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             newSpieße = unbeobachteteObstsortenFinden(newSpieße);
             #endregion
             //O(n)= spießeC*gesamtobst³
+            //Adjazenzmatrix befüllen
             foreach (Spieß spieß in newSpieße) {
                 for (int sch = 0; sch < spieß.schüsseln.Count; sch++) {
                     for (int sor = 0; sor < spieß.obstSorten.Count; sor++) {
@@ -63,6 +64,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                     }
                 }
             }
+            //Matrix verkleinern (Reihen und Spalten entfernen, die leer sind)
             List<int> emptyCol = findEmptyColumns(matrix);
             matrix = reduceMatrix(matrix, emptyCol);
 
@@ -163,12 +165,15 @@ namespace BwInf_39_2_2_Spießgesellen {
             int[] resultCombined = new int[gesamtObst * gesamtObst];
             var bestResults = constellation.getLowest(1, new List<int>());
 
+            //kombiniere beste Ergebnisse
             foreach (int index in bestResults) {
                 int[] thisExpandedResult = expandResult(constellation.results[index].result, emptyCol);
                 for (int i = 0; i < gesamtObst * gesamtObst; i++) {
                     resultCombined[i] += thisExpandedResult[i];
                 }
             }
+            //da unter den besten Ergebnissen oft ein paar falsche Zuordnungen vorkommen, sucht das Programm für 
+            //jede Schüssel die Sorten raus, die am öftesten in allen besten Ergebnissen zugeordnet wurde (bzw deren Wert in resultCombined am höchsten ist)
             for (int sch = 0; sch < gesamtObst; sch++) {
                 List<int> biggestSorNumIndices = new List<int>() { 0 };
                 for (int sor = 0; sor < gesamtObst; sor++) {

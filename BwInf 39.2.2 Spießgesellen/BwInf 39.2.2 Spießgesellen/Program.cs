@@ -26,11 +26,11 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nALGORITHMUS 2:");
-            new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus2();
+            //new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus2();
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nQUANTENCOMPUTER:");
-            new Quantenannealer(wunschSpieß, spieße, gesamtObst).quantenannealer();
+            //new Quantenannealer(wunschSpieß, spieße, gesamtObst).quantenannealer();
 
             Console.ReadLine();
         }
