@@ -23,12 +23,16 @@ namespace BwInf_39_2_2_Spießgesellen {
          * 2: unbeobachtete Schüsselnummern sammeln
          * 3: neuer Spieß aus obstsorten und schüsseln
          * */
+         /// <summary>
+         /// findet noch nicht beobachtete Obstsorten und Schüsseln, die existieren müssen.
+         /// </summary>
+         /// <returns>erweiterte Liste mit allen Spießen</returns>
         protected List<Spieß> unbeobachteteObstsortenFinden(List<Spieß> spieße) {
             //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
             //wenn n sorten unbeobachtet und gewünscht und sonst keine, kann TROTZDEM eine Lösung ausgegeben werden
             int beobachteteSorten = 0;
             foreach (Spieß sp in spieße) {
-                beobachteteSorten += sp.length;
+                beobachteteSorten += sp.länge;
             }
             if (beobachteteSorten != gesamtObst) {
                 //gewünschte Sorten, die nicht beobachtet wurden ausfindig machen
@@ -59,8 +63,12 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
             return spieße;
         }
-
-        //wenn ganzer Spieß in wunschSpieß enthalten ist, werden Spieß.schüsseln zu wunschSpieß.schüsseln hinzugefügt
+        
+        /// <summary>
+        /// kombiniert gewünschten Spieß
+        /// wenn ganzer Spieß in wunschSpieß enthalten ist, werden Spieß.schüsseln zu wunschSpieß.schüsseln hinzugefügt
+        /// </summary>
+        /// <returns>wunschSpieß mit hinzugefügten Schüsseln; Liste von Spießen die nur teilweise gewüsncht sind</returns>
         protected (Spieß wunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) wunschspießZusammensetzen(List<Spieß> spieße) {
             List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch = new List<(Spieß spieß, List<string> unpassendeSorten)>(); //Spieße mit nur teils gewünschten Obstsorten
             Spieß wunschSpieß = orgWunschSpieß.clone();
@@ -77,7 +85,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                 if (unpassendeSorten.Count == 0) {//ganzer Spieß gewünscht
                     wunschSpieß.schüsseln.AddRange(spieß.schüsseln);
                 }
-                else if (unpassendeSorten.Count != spieß.length) {//wenn ein Teil des Spießes gewünscht ist -> spießeHalbfalsch
+                else if (unpassendeSorten.Count != spieß.länge) {//wenn ein Teil des Spießes gewünscht ist -> spießeHalbfalsch
                     spießeHalbfalsch.Add((spieß, unpassendeSorten));
                 }
             }
@@ -87,7 +95,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         #endregion
         #region Ergebnisausgabe
 
-        protected virtual void printResult(List<Spieß> spieße, Spieß wunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) {
+        protected virtual void printErgebnis(List<Spieß> spieße, Spieß wunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) {
             Console.WriteLine("\nAUFGESPLITETE SPIESSE:");
             foreach (Spieß spieß in spieße) {
                 spieß.printSpieß();
@@ -95,8 +103,8 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\nWUNSCHSPIESS:");
             wunschSpieß.printSpieß();
 
-            Console.WriteLine("\nTEILWEISE PASSENDE:");
             if (spießeHalbfalsch.Count > 0) {
+                Console.WriteLine("\nTEILWEISE PASSENDE:");
                 printHalbfalschKurz(spießeHalbfalsch);
             }
         }

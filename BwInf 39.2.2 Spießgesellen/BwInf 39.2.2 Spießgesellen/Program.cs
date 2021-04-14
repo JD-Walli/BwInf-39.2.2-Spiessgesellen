@@ -9,11 +9,11 @@ namespace BwInf_39_2_2_Spießgesellen {
         [STAThread]
 
         static void Main(string[] args) {
-            int dataToLoad = 1;
-            (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(dataToLoad);
+            int datenSet = 1;
+            (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(datenSet);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
 
-            if (!validateData(wunschSpieß, spieße)) { return; }
+            if (!validiereDaten(wunschSpieß, spieße)) { return; }
 
             Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", wunschSpieß.obstSorten));
             Console.WriteLine("\nBEOBACHTETE SPIESSE:");
@@ -40,10 +40,10 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// <summary>
         /// reads data; returns Tuple von Wunschspieß, Liste von beobachteten Spießen, Anzahl an obstSorten/schüsseln
         /// </summary>
-        /// <param name="number">number of file (eg spieße3.txt -> number=3)</param>
+        /// <param name="datenSet">number of file (eg spieße3.txt -> number=3)</param>
         /// <returns>Tuple von Wunschspieß und einer Liste von beobachteten Spießen</returns>
-        public static (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) readData(int number) {
-            string[] lines = System.IO.File.ReadAllLines(System.IO.Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/spieße" + number + ".txt");
+        public static (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) readData(int datenSet) {
+            string[] lines = System.IO.File.ReadAllLines(System.IO.Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/spieße" + datenSet + ".txt");
             Spieß wunschspieß = new Spieß(new List<int>(), lines[1].Trim().Split(' ').ToList());
             List<Spieß> spieße = new List<Spieß>();
             for (int i = 3; i < int.Parse(lines[2]) * 2 + 3; i += 2) {
@@ -52,11 +52,11 @@ namespace BwInf_39_2_2_Spießgesellen {
             return (wunschspieß, spieße, int.Parse(lines[0].Trim()));
         }
 
-        public static bool validateData(Spieß wunschSpieß, List<Spieß> spieße) {
-            bool valid = true;
+        public static bool validiereDaten(Spieß wunschSpieß, List<Spieß> spieße) {
+            bool valide = true;
             foreach (Spieß sp in spieße) {
                 if (sp.schüsseln.Count != sp.obstSorten.Count) {
-                    valid = false;
+                    valide = false;
                     Console.WriteLine("invalid data (schüsseln.Count!=obstSorten.Count):");
                     sp.printSpieß();
                 }
@@ -67,7 +67,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                         if (i != j) {
                             if (sp.schüsseln[i] == sp.schüsseln[j]) {
                                 Console.WriteLine("invalid data (same value multiple times):");
-                                valid = false;
+                                valide = false;
                                 sp.printSpieß();
                             }
                         }
@@ -79,13 +79,13 @@ namespace BwInf_39_2_2_Spießgesellen {
                     if (i != j) {
                         if (wunschSpieß.obstSorten[i] == wunschSpieß.obstSorten[j]) {
                             Console.WriteLine("invalid data (wunschSpieß same obstsorte multiple times):");
-                            valid = false;
+                            valide = false;
                             wunschSpieß.printSpieß();
                         }
                     }
                 }
             }
-            if (valid) {
+            if (valide) {
                 Console.WriteLine("data is valid!");
                 return true;
             }
