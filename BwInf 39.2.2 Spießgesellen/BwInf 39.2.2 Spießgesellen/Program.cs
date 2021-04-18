@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
+using System.IO;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,7 +12,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         [STAThread]
 
         static void Main(string[] args) {
-            int datenSet = 1;
+            int datenSet = 3;
             (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(datenSet);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
 
@@ -22,7 +25,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
             
             Console.WriteLine("\nALGORITHMUS 1:");
-            new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus1();
+            //new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus1();
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nALGORITHMUS 2:");
@@ -30,7 +33,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nQUANTENCOMPUTER:");
-            //new Quantenannealer(wunschSpieß, spieße, gesamtObst).quantenannealer();
+            new Quantenannealer(wunschSpieß, spieße, gesamtObst).quantenannealing();
 
             Console.ReadLine();
         }
@@ -52,6 +55,12 @@ namespace BwInf_39_2_2_Spießgesellen {
             return (wunschspieß, spieße, int.Parse(lines[0].Trim()));
         }
 
+        /// <summary>
+        /// überprüft spieße auf plausibilität (gibt Fehlermeldung aus bei offensichtlichen widersprüchen)
+        /// </summary>
+        /// <param name="wunschSpieß"></param>
+        /// <param name="spieße"></param>
+        /// <returns></returns>
         public static bool validiereDaten(Spieß wunschSpieß, List<Spieß> spieße) {
             bool valide = true;
             foreach (Spieß sp in spieße) {
@@ -98,6 +107,26 @@ namespace BwInf_39_2_2_Spießgesellen {
                 Console.WriteLine("\n\n");
             }
             return false;
+        }
+
+        /**<summary>saves (.txt) file </summary>
+         * <param name="linesToWrite">text which is written to the file</param>
+         * <param name="defFileName">default file name</param>
+         **/
+        public static void saveFile(string[] linesToWrite, string defFileName) { //TODO: throw error if input invalid
+            SaveFileDialog sfd = new SaveFileDialog {
+                DefaultExt = ".txt",
+                FileName = defFileName,
+                Filter = "Text files(*.txt) | *.txt | All files(*.*) | *.*",
+                InitialDirectory = Directory.Exists("C:/Users/Jakov/Desktop/git") ? "C:/Users/Jakov/Desktop/git" : null,
+                RestoreDirectory = true,
+                Title = "choose path to save " + defFileName
+            };
+
+            if (sfd.ShowDialog() == DialogResult.OK) {
+                string folderName = sfd.FileName;
+                System.IO.File.WriteAllLines(folderName, linesToWrite);
+            }
         }
     }
 }

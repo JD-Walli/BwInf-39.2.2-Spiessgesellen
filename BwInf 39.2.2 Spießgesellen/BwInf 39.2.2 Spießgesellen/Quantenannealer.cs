@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using QA_Communication;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Linq;
+using System.Windows.Forms;
 
 
 namespace BwInf_39_2_2_Spießgesellen {
@@ -67,22 +71,28 @@ namespace BwInf_39_2_2_Spießgesellen {
             List<int> leereReihen = findeLeereReihen(matrix);
             matrix = verkleinereMatrix(matrix, leereReihen);
 
+
             List<int>[] ergebnis = new List<int>[gesamtObst];
             try {
+               Program.saveFile(new string[] { QA_Communication.Matrix.toQUBOString(matrix) },"qubomatrix");
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
                 {"annealing_time","20"},
                 {"num_reads","5000"}, //max 10000 (limitation by dwave)
-                {"chain_strength","3" }
+                {"chain_strength","30" }
                 };
                 Dictionary<string, string> pyParams = new Dictionary<string, string>() {
                 {"problem_type","qubo"}, //qubo //ising
                 {"dwave_solver", "Advantage_system1.1"}, //DW_2000Q_6 //Advantage_system1.1
                 {"dwave_inspector","false" }
                 };
-                Task<qaConstellation> constellationTask = QA_Communication.Program.qaCommunication(matrix, qaArguments, pyParams);
-                qaConstellation constellation = constellationTask.Result;
+
+                string qaArgumentsString = string.Join(",", qaArguments.Select(x => x.Key + "=" + x.Value).ToArray());
+                string pyParamsString = string.Join(",", pyParams.Select(x => x.Value).ToArray());
+                Program.saveFile( new string[]{qaArgumentsString, pyParamsString }, "data.txt");
+                Console.WriteLine("jetzt die Datei embed-and-run.py ausführen und sobald sie fertig ist auf enter drücken"); Console.ReadLine();
+
+                QA_Communication.qaConstellation constellation = new QA_Communication.qaConstellation(getResults(), qaArguments, pyParams);
                 constellation.printConstellation(20);
-                QA_Communication.Program.getUserInput(constellation, matrix);
                 //constellation.plotEnergyDistribution();
                 //constellation.saveInputData();
                 //constellation.saveResults();
@@ -96,8 +106,10 @@ namespace BwInf_39_2_2_Spießgesellen {
                 }
                 Console.WriteLine("\nWUNSCHSPIESS");
                 neuWunschSpieß.printSpieß();
-                return (neuWunschSpieß, neueSpieße);
 
+                QA_Communication.Program.getUserInput(constellation, matrix);
+
+                return (neuWunschSpieß, neueSpieße);
             }
             catch (Exception e) {
                 Console.WriteLine("\nERROR occured:");
@@ -107,19 +119,68 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
         }
 
+        #region Programm auf Quantencomputer ausführen
+        /**<summary>saves matrix</summary>
+         * <param name="matrix">quadratic qubo or ising matrix</param> 
+         * <param name="fileName">default name for matrix file</param>
+         * <param name="format">sets output datatype (float or int)</param>
+         **/
+        public static void saveMatrix(float[,] matrix, string format = "float") {
+            ArrayList output = new ArrayList();
+            for (int y = 0; y < (matrix.Length / matrix.GetLength(0)); y++) {
+                string line = "";
+                for (int x = 0; x < matrix.GetLength(0); x++) {
+                    line += (format == "float" ? matrix[y, x] : (int)matrix[y, x]) + " ";
+                }
+                output.Add(line);
+            }
+            Program.saveFile((string[])output.ToArray(typeof(string)), "qubomatrix");
+        }
+
+        List<(float energy, int numOccurrences, float chainBreakFraction, int[] result)> getResults() {
+            string[] lines = loadFile("results.txt");
+            List<(float energy, int numOccurrences, float chainBreakFraction, int[] result)> results = new List<(float energy, int numOccurrences, float chainBreakFraction, int[] result)>();
+            foreach(string line in lines) {
+                string[] args = line.Split('\t');
+                List<int> result = new List<int>();
+                string[] resultString = args[3].Split(' ');
+                foreach(string num in resultString) {
+                    result.Add(int.Parse(num.Replace("[", "").Replace("]", "").Trim()));
+                }
+                results.Add((float.Parse(args[0]), int.Parse(args[2]), float.Parse(args[1]), result.ToArray()));
+            }
+            return results;
+        }
+
+        public string[] loadFile(string defFileName) {
+            OpenFileDialog ofd = new OpenFileDialog {
+                DefaultExt = ".txt",
+                FileName = defFileName,
+                Filter = "All files(*.*) | *.*",
+                InitialDirectory = Directory.Exists("C:/Users/Jakov/Desktop/git") ? "C:/Users/Jakov/Desktop/git" : null,
+                RestoreDirectory = true,
+                Title = "choose path to load " + defFileName
+            };
+            if (ofd.ShowDialog() == DialogResult.OK) {
+                return File.ReadAllLines(ofd.FileName);
+            }
+            else {return null; }
+        }
+
+        #endregion
 
         /// <summary>
         /// aus Ergebnis in 0 und 1 Spieße ableiten
         /// </summary>
         /// <param name="constellation">Konstellation der Eingaben/Ausgaben des Quantencomputers</param>
         /// <returns></returns>
-        (List<Spieß> returnSpieße, List<int>[] solution) decodiereQCErgebnis(qaConstellation constellation, List<int> leereReihen, char[] alphabet) {
+        (List<Spieß> returnSpieße, List<int>[] solution) decodiereQCErgebnis(QA_Communication.qaConstellation constellation, List<int> leereReihen, char[] alphabet) {
             List<int>[] solution = new List<int>[gesamtObst]; //index entspricht sorte, value entspricht schüssel
             for (int i = 0; i < solution.Length; i++) { solution[i] = new List<int>(); }
             List<Spieß> returnSpieße = new List<Spieß>();
 
             int[] ergebnisKombiniert = new int[gesamtObst * gesamtObst];
-            var besteErgebnisse = constellation.getLowest(1, new List<int>());
+            var besteErgebnisse = constellation.getLowest(1, new List<int>()); //beste Ergebnisse finden
 
             //kombiniere beste Ergebnisse
             foreach (int index in besteErgebnisse) {

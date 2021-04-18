@@ -35,22 +35,14 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// <returns>Tuple von verändertem spieß2 und dem neuen Schnittmengen-Spieß</returns>
         public (Spieß spieß2neu,Spieß schnittSpieß) vergleicheSpieße(Spieß spieß2) {
             Spieß schnittSpieß = new Spieß(new List<int>(),new List<string>());
-            //für Laufzeitoptimierung
-            /*List<int> fruitsToDelete1 = new List<int>();
-            List<int> schüsselnToDelete1 = new List<int>();
-            List<int> fruitsToDelete2 = new List<int>();
-            List<int> schüsselnToDelete2 = new List<int>();*/
+
             for (int i = 0; i < länge; i++) {
                 for (int j = 0; j < spieß2.länge; j++) {
                     if (schüsseln[i] == spieß2.schüsseln[j]) {
                         schnittSpieß.schüsseln.Add(schüsseln[i]);
-                        //schüsselnToDelete1.Add(i);Laufzeitoptimierung
-                        //schüsselnToDelete2.Add(j);
                     }
                     if (obstSorten[i] == spieß2.obstSorten[j]) {
                         schnittSpieß.obstSorten.Add(obstSorten[i]);
-                        //fruitsToDelete1.Add(i);Laufzeitoptimierung
-                        //fruitsToDelete2.Add(j);
                     }
                 }
             }
