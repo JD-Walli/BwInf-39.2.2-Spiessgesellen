@@ -12,7 +12,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         [STAThread]
 
         static void Main(string[] args) {
-            int datenSet = 3;
+            int datenSet = 5;
             (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(datenSet);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
 
@@ -25,7 +25,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
             
             Console.WriteLine("\nALGORITHMUS 1:");
-            //new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus1();
+            new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus1();
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nALGORITHMUS 2:");
@@ -109,11 +109,11 @@ namespace BwInf_39_2_2_Spießgesellen {
             return false;
         }
 
-        /**<summary>saves (.txt) file </summary>
-         * <param name="linesToWrite">text which is written to the file</param>
-         * <param name="defFileName">default file name</param>
+        /**<summary>speichert (.txt) file </summary>
+         * <param name="linesToWrite">text der in Datei geschrieben wird</param>
+         * <param name="defFileName">standard Dateiname ohne txt</param>
          **/
-        public static void saveFile(string[] linesToWrite, string defFileName) { //TODO: throw error if input invalid
+        public static void saveFile(string[] linesToWrite, string defFileName) {
             SaveFileDialog sfd = new SaveFileDialog {
                 DefaultExt = ".txt",
                 FileName = defFileName,
@@ -127,6 +127,24 @@ namespace BwInf_39_2_2_Spießgesellen {
                 string folderName = sfd.FileName;
                 System.IO.File.WriteAllLines(folderName, linesToWrite);
             }
+        }
+
+        /**<summary>lädt (.txt) file </summary>
+         * <param name="defFileName">standard Dateiname ohne txt</param>
+         **/
+        public static string[] loadFile(string defFileName) {
+            OpenFileDialog ofd = new OpenFileDialog {
+                DefaultExt = ".txt",
+                FileName = defFileName,
+                Filter = "All files(*.*) | *.*",
+                InitialDirectory = Directory.Exists("C:/Users/Jakov/Desktop/git") ? "C:/Users/Jakov/Desktop/git" : null,
+                RestoreDirectory = true,
+                Title = "choose path to load " + defFileName
+            };
+            if (ofd.ShowDialog() == DialogResult.OK) {
+                return File.ReadAllLines(ofd.FileName);
+            }
+            else { return null; }
         }
     }
 }

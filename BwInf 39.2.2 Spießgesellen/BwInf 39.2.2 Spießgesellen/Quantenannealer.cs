@@ -27,14 +27,13 @@ namespace BwInf_39_2_2_Spießgesellen {
             char[] alphabetAllg = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
             char[] alphabet = new char[gesamtObst];
             Array.Copy(alphabetAllg, alphabet, gesamtObst);
+
             float[,] matrix = new float[gesamtObst * gesamtObst, gesamtObst * gesamtObst];
             List<Spieß> neueSpieße = new List<Spieß>();
             foreach (Spieß sp in orgSpieße) { neueSpieße.Add(sp.clone()); }
 
-            #region gewünschte, unbeobachtete Obstsorten verarbeiten
             neueSpieße = unbeobachteteObstsortenFinden(neueSpieße);
-            #endregion
-            //O(n)= spießeC*gesamtobst³
+
             //Adjazenzmatrix befüllen
             foreach (Spieß spieß in neueSpieße) {
                 for (int sch = 0; sch < spieß.schüsseln.Count; sch++) {
@@ -71,35 +70,37 @@ namespace BwInf_39_2_2_Spießgesellen {
             List<int> leereReihen = findeLeereReihen(matrix);
             matrix = verkleinereMatrix(matrix, leereReihen);
 
-
+            //Parameter für Quantencomputer festelegen
             List<int>[] ergebnis = new List<int>[gesamtObst];
             try {
-               Program.saveFile(new string[] { QA_Communication.Matrix.toQUBOString(matrix) },"qubomatrix");
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
                 {"annealing_time","20"},
                 {"num_reads","5000"}, //max 10000 (limitation by dwave)
-                {"chain_strength","30" }
+                {"chain_strength","3" }
                 };
                 Dictionary<string, string> pyParams = new Dictionary<string, string>() {
                 {"problem_type","qubo"}, //qubo //ising
                 {"dwave_solver", "Advantage_system1.1"}, //DW_2000Q_6 //Advantage_system1.1
-                {"dwave_inspector","false" }
+                {"dwave_inspector","true" }
                 };
 
                 string qaArgumentsString = string.Join(",", qaArguments.Select(x => x.Key + "=" + x.Value).ToArray());
                 string pyParamsString = string.Join(",", pyParams.Select(x => x.Value).ToArray());
+                //daten dür python speichern
+                Program.saveFile(new string[] { QA_Communication.Matrix.toQUBOString(matrix) }, "qubomatrix");
                 Program.saveFile( new string[]{qaArgumentsString, pyParamsString }, "data.txt");
+
                 Console.WriteLine("jetzt die Datei embed-and-run.py ausführen und sobald sie fertig ist auf enter drücken"); Console.ReadLine();
 
+                //Ergebnisse lesen
                 QA_Communication.qaConstellation constellation = new QA_Communication.qaConstellation(getResults(), qaArguments, pyParams);
                 constellation.printConstellation(20);
                 //constellation.plotEnergyDistribution();
-                //constellation.saveInputData();
-                //constellation.saveResults();
                 (neueSpieße, ergebnis) = decodiereQCErgebnis(constellation, leereReihen, alphabet);
 
                 (Spieß neuWunschSpieß, List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) = wunschspießZusammensetzen(neueSpieße);
 
+                //Ausgabe
                 Console.WriteLine("\nSOLUTION QANTUM");
                 for (int s = 0; s < ergebnis.Length; s++) {
                     Console.WriteLine(alphabet[s] + " : " + string.Join(",", ergebnis[s]));
@@ -119,8 +120,8 @@ namespace BwInf_39_2_2_Spießgesellen {
             }
         }
 
-        #region Programm auf Quantencomputer ausführen
-        /**<summary>saves matrix</summary>
+        #region Kommunikation mit Quantencomputer
+        /**<summary>speichert matrix</summary>
          * <param name="matrix">quadratic qubo or ising matrix</param> 
          * <param name="fileName">default name for matrix file</param>
          * <param name="format">sets output datatype (float or int)</param>
@@ -137,8 +138,12 @@ namespace BwInf_39_2_2_Spießgesellen {
             Program.saveFile((string[])output.ToArray(typeof(string)), "qubomatrix");
         }
 
+        /// <summary>
+        /// lädt results, die vom python script gespeichert wurden
+        /// </summary>
+        /// <returns></returns>
         List<(float energy, int numOccurrences, float chainBreakFraction, int[] result)> getResults() {
-            string[] lines = loadFile("results.txt");
+            string[] lines = Program.loadFile("results.txt");
             List<(float energy, int numOccurrences, float chainBreakFraction, int[] result)> results = new List<(float energy, int numOccurrences, float chainBreakFraction, int[] result)>();
             foreach(string line in lines) {
                 string[] args = line.Split('\t');
@@ -147,67 +152,13 @@ namespace BwInf_39_2_2_Spießgesellen {
                 foreach(string num in resultString) {
                     result.Add(int.Parse(num.Replace("[", "").Replace("]", "").Trim()));
                 }
-                results.Add((float.Parse(args[0]), int.Parse(args[2]), float.Parse(args[1]), result.ToArray()));
+                results.Add((float.Parse(args[0].Replace(".", ",")), int.Parse(args[2]), float.Parse(args[1].Replace(".",",")), result.ToArray()));
             }
             return results;
         }
-
-        public string[] loadFile(string defFileName) {
-            OpenFileDialog ofd = new OpenFileDialog {
-                DefaultExt = ".txt",
-                FileName = defFileName,
-                Filter = "All files(*.*) | *.*",
-                InitialDirectory = Directory.Exists("C:/Users/Jakov/Desktop/git") ? "C:/Users/Jakov/Desktop/git" : null,
-                RestoreDirectory = true,
-                Title = "choose path to load " + defFileName
-            };
-            if (ofd.ShowDialog() == DialogResult.OK) {
-                return File.ReadAllLines(ofd.FileName);
-            }
-            else {return null; }
-        }
-
+        
         #endregion
-
-        /// <summary>
-        /// aus Ergebnis in 0 und 1 Spieße ableiten
-        /// </summary>
-        /// <param name="constellation">Konstellation der Eingaben/Ausgaben des Quantencomputers</param>
-        /// <returns></returns>
-        (List<Spieß> returnSpieße, List<int>[] solution) decodiereQCErgebnis(QA_Communication.qaConstellation constellation, List<int> leereReihen, char[] alphabet) {
-            List<int>[] solution = new List<int>[gesamtObst]; //index entspricht sorte, value entspricht schüssel
-            for (int i = 0; i < solution.Length; i++) { solution[i] = new List<int>(); }
-            List<Spieß> returnSpieße = new List<Spieß>();
-
-            int[] ergebnisKombiniert = new int[gesamtObst * gesamtObst];
-            var besteErgebnisse = constellation.getLowest(1, new List<int>()); //beste Ergebnisse finden
-
-            //kombiniere beste Ergebnisse
-            foreach (int index in besteErgebnisse) {
-                int[] erweitertesErgebnis = vergrößereErgebnis(constellation.results[index].result, leereReihen);
-                for (int i = 0; i < gesamtObst * gesamtObst; i++) {
-                    ergebnisKombiniert[i] += erweitertesErgebnis[i];
-                }
-            }
-            //da unter den besten Ergebnissen oft ein paar falsche Zuordnungen vorkommen, sucht das Programm für 
-            //jede Schüssel die Sorten raus, die am öftesten in allen besten Ergebnissen zugeordnet wurde (bzw deren Wert in ergebnisKombiniert am höchsten ist)
-            for (int sch = 0; sch < gesamtObst; sch++) {
-                List<int> häufigsteSorten = new List<int>() { 0 }; //häufigsteSorten in ergebnisKombiniert
-                for (int sor = 0; sor < gesamtObst; sor++) {
-                    if (ergebnisKombiniert[sch * gesamtObst + sor] > ergebnisKombiniert[sch * gesamtObst + häufigsteSorten[0]]) {
-                        häufigsteSorten = new List<int>() { sor };
-                    }
-                    else if (ergebnisKombiniert[sch * gesamtObst + sor] == ergebnisKombiniert[sch * gesamtObst + häufigsteSorten[0]] && ergebnisKombiniert[sch * gesamtObst + sor] > 0 && sor > 0) {
-                        häufigsteSorten.Add(sor);
-                    }
-                }
-                foreach (int sorte in häufigsteSorten) {
-                    solution[sorte].Add(sch + 1);
-                    returnSpieße.Add(new Spieß(new List<int>() { sch + 1 }, new List<string>() { alphabet[sorte] + "" }));
-                }
-            }
-            return (returnSpieße, solution);
-        }
+        #region verarbeite Ergebnis/ Matrix
 
         /// <summary>
         /// findet alle leeren Reihen/Spalten in matrix
@@ -255,6 +206,46 @@ namespace BwInf_39_2_2_Spießgesellen {
         }
 
         /// <summary>
+        /// aus Ergebnis in 0 und 1 Spieße ableiten
+        /// </summary>
+        /// <param name="constellation">Konstellation der Eingaben/Ausgaben des Quantencomputers</param>
+        /// <returns></returns>
+        (List<Spieß> returnSpieße, List<int>[] solution) decodiereQCErgebnis(QA_Communication.qaConstellation constellation, List<int> leereReihen, char[] alphabet) {
+            List<int>[] solution = new List<int>[gesamtObst]; //index entspricht sorte, value entspricht schüssel
+            for (int i = 0; i < solution.Length; i++) { solution[i] = new List<int>(); }
+            List<Spieß> returnSpieße = new List<Spieß>();
+
+            int[] ergebnisKombiniert = new int[gesamtObst * gesamtObst];
+            var besteErgebnisse = constellation.getLowest(1, new List<int>()); //beste Ergebnisse finden
+
+            //kombiniere beste Ergebnisse
+            foreach (int index in besteErgebnisse) {
+                int[] erweitertesErgebnis = vergrößereErgebnis(constellation.results[index].result, leereReihen);
+                for (int i = 0; i < gesamtObst * gesamtObst; i++) {
+                    ergebnisKombiniert[i] += erweitertesErgebnis[i];
+                }
+            }
+            //da unter den besten Ergebnissen oft ein paar falsche Zuordnungen vorkommen, sucht das Programm für 
+            //jede Schüssel die Sorten raus, die am öftesten in allen besten Ergebnissen zugeordnet wurde (bzw deren Wert in ergebnisKombiniert am höchsten ist)
+            for (int sch = 0; sch < gesamtObst; sch++) {
+                List<int> häufigsteSorten = new List<int>() { 0 }; //häufigsteSorten in ergebnisKombiniert
+                for (int sor = 0; sor < gesamtObst; sor++) {
+                    if (ergebnisKombiniert[sch * gesamtObst + sor] > ergebnisKombiniert[sch * gesamtObst + häufigsteSorten[0]]) {
+                        häufigsteSorten = new List<int>() { sor };
+                    }
+                    else if (ergebnisKombiniert[sch * gesamtObst + sor] == ergebnisKombiniert[sch * gesamtObst + häufigsteSorten[0]] && ergebnisKombiniert[sch * gesamtObst + sor] > 0 && sor > 0) {
+                        häufigsteSorten.Add(sor);
+                    }
+                }
+                foreach (int sorte in häufigsteSorten) {
+                    solution[sorte].Add(sch + 1);
+                    returnSpieße.Add(new Spieß(new List<int>() { sch + 1 }, new List<string>() { alphabet[sorte] + "" }));
+                }
+            }
+            return (returnSpieße, solution);
+        }
+
+        /// <summary>
         /// erweitern des Ergebnisses mit den vorher aus der Matrix herausgenommenen leeren Reihen/Spalten
         /// um eine einfachere Dekodierung zu ermöglichen
         /// </summary>
@@ -271,6 +262,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             return neuesErgebnis;
         }
 
+        #endregion
     }
 
 }

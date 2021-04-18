@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BwInf_39_2_2_Spießgesellen {
     class Algorithmus : basisAlgorithmus {
 
-        public Algorithmus(Spieß orgWunschSpieß, List<Spieß> orgSpieße, int gesamtObst):base(orgWunschSpieß,orgSpieße,gesamtObst) {
+        public Algorithmus(Spieß orgWunschSpieß, List<Spieß> orgSpieße, int gesamtObst) : base(orgWunschSpieß, orgSpieße, gesamtObst) {
             this.orgWunschSpieß = orgWunschSpieß;
             this.orgSpieße = orgSpieße;
             this.gesamtObst = gesamtObst;
@@ -59,23 +59,23 @@ namespace BwInf_39_2_2_Spießgesellen {
          * neuer Spieß gespeichert und von den ursprünglichen Spießen entfernt.
          * So kann man möglichst reduzierte Spieße erzeugen, die wiederum zum Wunschspieß zusammengesetzt werden können.
          * */
-         /// <summary>
-         /// möglichst kleinste Obstsorte->Schüssel Zuordnungen finden
-         /// Ansatz: Spieße vergleichen und Schnittspieße bilden
-         /// </summary>
-         /// <returns>aufgespaltete Spieße</returns>
+        /// <summary>
+        /// möglichst kleinste Obstsorte->Schüssel Zuordnungen finden
+        /// Ansatz: Spieße vergleichen und Schnittspieße bilden
+        /// </summary>
+        /// <returns>aufgespaltete Spieße</returns>
         List<Spieß> spießeAufspalten(List<Spieß> spieße) {
-                for (int i = 0; i < spieße.Count; i++) {
-                    for (int j = i; j < spieße.Count; j++) {
-                        if (i != j) {
-                            (Spieß spieß2neu, Spieß schnittSpieß) = spieße[i].vergleicheSpieße(spieße[j]);
-                            if (schnittSpieß.länge > 0) {
-                                spieße[j] = spieß2neu;
-                                spieße.Add(schnittSpieß);
-                            }
+            for (int i = 0; i < spieße.Count; i++) {
+                for (int j = i; j < spieße.Count; j++) {
+                    if (i != j) {
+                        (Spieß spieß2neu, Spieß schnittSpieß) = spieße[i].vergleicheSpieße(spieße[j]);
+                        if (schnittSpieß.länge > 0) {
+                            spieße[j] = spieß2neu;
+                            spieße.Add(schnittSpieß);
                         }
                     }
                 }
+            }
             spieße.RemoveAll(sp => sp.länge == 0);
             return spieße;
         }
@@ -106,50 +106,50 @@ namespace BwInf_39_2_2_Spießgesellen {
                 }
             }
 
-            //zusammenrechnen der Reihen und Spalten der Überschneidungstabelle
-            List<int>[] spalten = new List<int>[gesamtObst];
-            List<int>[] reihen = new List<int>[gesamtObst];
-            for (int e = 0; e < gesamtObst; e++) { spalten[e] = new List<int>(); reihen[e] = new List<int>(); }
+            //Höchstwerte aus Reihen und Spalten der Überschneidungstabelle finden
+            List<int>[] spaltenMax = new List<int>[gesamtObst];
+            List<int>[] reihenMax = new List<int>[gesamtObst];
+            for (int e = 0; e < gesamtObst; e++) { spaltenMax[e] = new List<int>(); reihenMax[e] = new List<int>(); }
 
             for (int i = 0; i < gesamtObst; i++) {
                 int höchsterWertSpalte = -1;
                 int höchsterWertReihe = -1;
                 for (int j = 0; j < gesamtObst; j++) {
-                    //finde indices der höchsten Werte in der betrachteten Spalte i
+                    //finde indizes der höchsten Werte in der betrachteten Spalte i
                     if (überschneidungsTabelle[i, j] > höchsterWertSpalte && überschneidungsTabelle[i, j] > 0) {
                         höchsterWertSpalte = überschneidungsTabelle[i, j];
-                        spalten[i] = new List<int>() { j };
+                        spaltenMax[i] = new List<int>() { j };
                     }
                     else if (überschneidungsTabelle[i, j] == höchsterWertSpalte) {
-                        spalten[i].Add(j);
+                        spaltenMax[i].Add(j);
                     }
 
-                    //finde indices der höchsten Werte in der betrachteten Reihe i
+                    //finde indizes der höchsten Werte in der betrachteten Reihe i
                     if (überschneidungsTabelle[j, i] > höchsterWertReihe && überschneidungsTabelle[j, i] > 0) {
                         höchsterWertReihe = überschneidungsTabelle[j, i];
-                        reihen[i] = new List<int>() { j };
+                        reihenMax[i] = new List<int>() { j };
                     }
                     else if (überschneidungsTabelle[j, i] == höchsterWertReihe) {
-                        reihen[i].Add(j);
+                        reihenMax[i].Add(j);
                     }
                 }
             }
 
-            //Spieße aus den ausgewählten höchstewerten der überschneidungstabelle bilden
+            //Spieße aus den ausgewählten höchstwerten der überschneidungstabelle bilden
             List<Spieß> neueSpieße = new List<Spieß>();
-            for (int spaltenInd = 0; spaltenInd < gesamtObst; spaltenInd++) {
+            for (int spaltenIndex = 0; spaltenIndex < gesamtObst; spaltenIndex++) {
                 Spieß intersectionSpieß = new Spieß(new List<int>(), new List<string>());
 
                 //indizes der Schüsseln hinzufügen, die in der Spalte einen Reihenhöchstwert haben.
-                foreach (int schüsselIndex in spalten[spaltenInd]) {
-                    if (reihen[schüsselIndex].Contains(spaltenInd)) {
+                foreach (int schüsselIndex in spaltenMax[spaltenIndex]) {
+                    if (reihenMax[schüsselIndex].Contains(spaltenIndex)) {
                         intersectionSpieß.schüsseln.Add(schüsselIndex + 1);
                     }
                 }
 
                 if (intersectionSpieß.schüsseln.Count > 0) {
-                    intersectionSpieß.obstSorten.Add(alphabetAllg[spaltenInd] + "");
-                    intersectionSpieß.updateLänge();
+                    intersectionSpieß.obstSorten.Add(alphabetAllg[spaltenIndex] + "");
+                    intersectionSpieß.updateLänge(false);
                     //wenn mehrere schüsseln zur obstsorte gefunden wurden müssen weitere obstsorten auch die gleichen Obstsorten zugeordnet haben. 
                     //daher wird bei den bisher hinzugefügten geprüft, ob die Verteilung schon gibt und dementsprechend die Obstsorte zum Spieß hinzugefügt.
                     if (intersectionSpieß.schüsseln.Count != intersectionSpieß.obstSorten.Count) {

@@ -24,9 +24,11 @@ namespace BwInf_39_2_2_Spießgesellen {
             länge = obstSorten.Count();
         }
 
+        /// <summary> Wertkopie von Spieß </summary>
         public Spieß clone() {
             return new Spieß(schüsseln.ToList(), obstSorten.ToList());
         }
+
         /// <summary>
         /// vergleicht 2 Spieße; erstellt neuen Spieß mit Schnittmenge von schüsseln und obstSorten; entfernt Schnittmenge aus beiden Ursprungsspießen
         /// returns Tuple von verändertem spieß2 und dem neuen Schnittmengen-Spieß
@@ -36,6 +38,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         public (Spieß spieß2neu,Spieß schnittSpieß) vergleicheSpieße(Spieß spieß2) {
             Spieß schnittSpieß = new Spieß(new List<int>(),new List<string>());
 
+            //überschneidungen in sorten und schüsseln suchen
             for (int i = 0; i < länge; i++) {
                 for (int j = 0; j < spieß2.länge; j++) {
                     if (schüsseln[i] == spieß2.schüsseln[j]) {
@@ -47,6 +50,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                 }
             }
             schnittSpieß.updateLänge();
+            //überschneidung aus ursprünglichen Spießen löschen
             for(int i = 0; i < schnittSpieß.länge;i++) {
                 schüsseln.Remove(schnittSpieß.schüsseln[i]);
                 spieß2.schüsseln.Remove(schnittSpieß.schüsseln[i]);
@@ -61,9 +65,9 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// <summary>
         /// setzt länge auf obstsorten.Count() und überprüft ob sorten.Count==schüsseln.Count
         /// </summary>
-        public void updateLänge() {
+        public void updateLänge(bool checkLength=true) {
             länge = obstSorten.Count();
-            if (schüsseln.Count != obstSorten.Count) {
+            if (checkLength && schüsseln.Count != obstSorten.Count) {
                 Console.WriteLine("invalid data (amount of overlap between two Spieße not equal in schüsseln and obstSorten). overlap: ");
                 printSpieß();
                 Console.WriteLine("exit...");

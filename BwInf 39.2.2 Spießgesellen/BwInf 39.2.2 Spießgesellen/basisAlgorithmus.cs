@@ -28,8 +28,7 @@ namespace BwInf_39_2_2_Spießgesellen {
          /// </summary>
          /// <returns>erweiterte Liste mit allen Spießen</returns>
         protected List<Spieß> unbeobachteteObstsortenFinden(List<Spieß> spieße) {
-            //Abfangen, dass unbeobachtete Obstsorten gewünscht werden
-            //wenn n sorten unbeobachtet und gewünscht und sonst keine, kann TROTZDEM eine Lösung ausgegeben werden
+            //überprüfen ob alle Spieße beobachtet wurden
             int beobachteteSorten = 0;
             foreach (Spieß sp in spieße) {
                 beobachteteSorten += sp.länge;
@@ -46,7 +45,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                 }
                 //sollten Sorten weder gewünscht noch beobachtet sein, aber existieren, werden sie als unbekannte Obstsorte hinterlegt
                 for (int i = 0; unbeobachteteSorten.Count < gesamtObst - beobachteteSorten; i++) {
-                    unbeobachteteSorten.Add("unbekannte Obstsorte " + i);
+                    unbeobachteteSorten.Add("unbekannte_Obstsorte_" + i);
                 }
 
                 //Schüsselnummern, die nicht genannt wurden, aber existieren müssen, werden ausfindig gemacht
@@ -77,6 +76,7 @@ namespace BwInf_39_2_2_Spießgesellen {
 
             foreach (Spieß spieß in spieße) {
                 List<string> unpassendeSorten = new List<string>();
+                //nicht-gewünschte Sorten im Spieß suchen
                 foreach (string obst in spieß.obstSorten) {
                     if (!wunschObstChar.Contains(obst.ToLower()[0])) {
                         unpassendeSorten.Add(obst);
@@ -116,7 +116,6 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// <param name="spießeHalbfalsch">Liste der teilweise richtigen Spieße mit List<string> der ungewünschten Obstsorten</param>
         protected void printHalbfalschKurz(List<(Spieß spieß, List<string> unpassendeSorten)> spießeHalbfalsch) {
             //spießeHalbfalsch.Sort((tup1, tup2) => ((tup1.Item1.length-tup1.Item2.Count) / tup1.Item1.length).CompareTo((tup2.Item1.length - tup2.Item2.Count) / tup2.Item1.length));//elemente mit einem besseren gewünschteSortenImSpieß zu Spießlänge Verhältnis weiter oben
-            Console.WriteLine();
             for (int i = 0; i < spießeHalbfalsch.Count; i++) {
                 foreach (string obst in spießeHalbfalsch[i].spieß.obstSorten) {
                     Console.ForegroundColor = spießeHalbfalsch[i].unpassendeSorten.Contains(obst) ? ConsoleColor.DarkRed : ConsoleColor.White;
@@ -161,7 +160,6 @@ namespace BwInf_39_2_2_Spießgesellen {
         }
 
         #endregion
-
         
     }
 }
