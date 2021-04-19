@@ -4,10 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
-using System.Diagnostics;
-using System.Net.Http;
 using System.Linq;
-using System.Windows.Forms;
 
 
 namespace BwInf_39_2_2_Spießgesellen {
@@ -50,7 +47,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                         for (int sorte2 = 0; sorte2 < gesamtObst; sorte2++) {
                             int y = schüssel2 * gesamtObst + sorte2;
                             if (x != y) {
-                                //nur Qubits connecten, die beide die Möglichkeit haben besetzt zu werden (=grundsätzlich belohnt werden;=eine Obst-schüssel kombi darstellen, die vorkommen könnte)
+                                //nur Qubits connecten, die beide die Möglichkeit haben besetzt zu werden (also grundsätzlich belohnt werden beziehungsweise eine Obst-schüssel kombi darstellen, die vorkommen könnte)
                                 if (matrix[x, x] != 0 && matrix[y, y] != 0) {
                                     //gleiche Spalte aka schüssel
                                     if (schüssel1 == schüssel2) {
@@ -74,9 +71,9 @@ namespace BwInf_39_2_2_Spießgesellen {
             List<int>[] ergebnis = new List<int>[gesamtObst];
             try {
                 Dictionary<string, string> qaArguments = new Dictionary<string, string>() {
-                {"annealing_time","20"},
-                {"num_reads","5000"}, //max 10000 (limitation by dwave)
-                {"chain_strength","3" }
+                {"annealing_time","40"},
+                {"num_reads","10000"}, //max 10000 (limitation by dwave)
+                {"chain_strength","4" }
                 };
                 Dictionary<string, string> pyParams = new Dictionary<string, string>() {
                 {"problem_type","qubo"}, //qubo //ising
@@ -121,23 +118,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         }
 
         #region Kommunikation mit Quantencomputer
-        /**<summary>speichert matrix</summary>
-         * <param name="matrix">quadratic qubo or ising matrix</param> 
-         * <param name="fileName">default name for matrix file</param>
-         * <param name="format">sets output datatype (float or int)</param>
-         **/
-        public static void saveMatrix(float[,] matrix, string format = "float") {
-            ArrayList output = new ArrayList();
-            for (int y = 0; y < (matrix.Length / matrix.GetLength(0)); y++) {
-                string line = "";
-                for (int x = 0; x < matrix.GetLength(0); x++) {
-                    line += (format == "float" ? matrix[y, x] : (int)matrix[y, x]) + " ";
-                }
-                output.Add(line);
-            }
-            Program.saveFile((string[])output.ToArray(typeof(string)), "qubomatrix");
-        }
-
+        
         /// <summary>
         /// lädt results, die vom python script gespeichert wurden
         /// </summary>

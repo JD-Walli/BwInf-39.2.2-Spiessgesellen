@@ -1,0 +1,13 @@
+19.04.2021 08:16:29
+
+
+     QA_ARGUMENTS:
+
+        annealing_time	 =  40
+        num_reads	 =  10000
+        chain_strength	 =  4
+     PY_PARAMS:
+
+        problem_type	 =  qubo
+        dwave_solver	 =  Advantage_system1.1
+        dwave_inspector	 =  true

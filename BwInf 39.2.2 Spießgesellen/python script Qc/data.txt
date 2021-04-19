@@ -1,2 +1,2 @@
-annealing_time=20,num_reads=5000,chain_strength=3
+annealing_time=40,num_reads=10000,chain_strength=4
 qubo,Advantage_system1.1,true

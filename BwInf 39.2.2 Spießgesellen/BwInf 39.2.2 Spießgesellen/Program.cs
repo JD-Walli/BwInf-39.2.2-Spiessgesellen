@@ -12,7 +12,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         [STAThread]
 
         static void Main(string[] args) {
-            int datenSet = 5;
+            int datenSet = 2;
             (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(datenSet);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
 
@@ -29,7 +29,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nALGORITHMUS 2:");
-            //new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus2();
+            new Algorithmus(wunschSpieß, spieße, gesamtObst).algorithmus2();
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nQUANTENCOMPUTER:");
@@ -39,14 +39,13 @@ namespace BwInf_39_2_2_Spießgesellen {
         }
 
         
-
         /// <summary>
         /// reads data; returns Tuple von Wunschspieß, Liste von beobachteten Spießen, Anzahl an obstSorten/schüsseln
         /// </summary>
         /// <param name="datenSet">number of file (eg spieße3.txt -> number=3)</param>
         /// <returns>Tuple von Wunschspieß und einer Liste von beobachteten Spießen</returns>
         public static (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) readData(int datenSet) {
-            string[] lines = System.IO.File.ReadAllLines(System.IO.Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/spieße" + datenSet + ".txt");
+            string[] lines = System.IO.File.ReadAllLines(Environment.CurrentDirectory + "/spieße" + datenSet + ".txt");
             Spieß wunschspieß = new Spieß(new List<int>(), lines[1].Trim().Split(' ').ToList());
             List<Spieß> spieße = new List<Spieß>();
             for (int i = 3; i < int.Parse(lines[2]) * 2 + 3; i += 2) {

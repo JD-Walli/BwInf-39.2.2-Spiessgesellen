@@ -10,7 +10,7 @@ from dwave.cloud import Client
 with open('qubomatrix.txt') as f:
     qubo=f.readlines()[0]
 
-#Preprocessing (htmlinput to data)
+#Preprocessing (input to data)
 print("\nPreprocess data . . .")
 with open('data.txt') as f:
     params = f.readlines()
