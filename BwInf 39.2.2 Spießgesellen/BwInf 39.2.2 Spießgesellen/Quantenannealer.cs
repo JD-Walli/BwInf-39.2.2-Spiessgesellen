@@ -66,7 +66,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             //Matrix verkleinern (Reihen und Spalten entfernen, die leer sind)
             List<int> leereReihen = findeLeereReihen(matrix);
             matrix = verkleinereMatrix(matrix, leereReihen);
-
+            QA_Communication.Matrix.saveMatrix(matrix);
             //Parameter für Quantencomputer festelegen
             List<int>[] ergebnis = new List<int>[gesamtObst];
             try {
