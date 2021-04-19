@@ -13,6 +13,7 @@ namespace BwInf_39_2_2_Spießgesellen {
 
         static void Main(string[] args) {
             int datenSet = 2;
+            Console.WriteLine(Environment.CurrentDirectory);
             (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(datenSet);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
 
@@ -33,6 +34,7 @@ namespace BwInf_39_2_2_Spießgesellen {
             Console.WriteLine("\n\n\n");
 
             Console.WriteLine("\nQUANTENCOMPUTER:");
+            Console.WriteLine("press Enter to proceed..."); Console.ReadLine();
             new Quantenannealer(wunschSpieß, spieße, gesamtObst).quantenannealing();
 
             Console.ReadLine();

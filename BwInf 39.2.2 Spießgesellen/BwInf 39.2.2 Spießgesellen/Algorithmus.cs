@@ -158,7 +158,7 @@ namespace BwInf_39_2_2_Spießgesellen {
                             if (spieß.schüsseln.Intersect(intersectionSpieß.schüsseln).ToList().Count == intersectionSpieß.schüsseln.Count) {
                                 paarGefunden = true;
                                 spieß.obstSorten.AddRange(intersectionSpieß.obstSorten);
-                                spieß.updateLänge();
+                                spieß.updateLänge(false);
                             }
                         }
                         if (paarGefunden == false) {
