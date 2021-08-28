@@ -14,10 +14,12 @@ namespace BwInf_39_2_2_Spießgesellen {
         static void Main(string[] args) {
             int datenSet = 2;
             Console.WriteLine(Environment.CurrentDirectory);
-            (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = readData(datenSet);
+            (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = leseDaten(datenSet);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
 
-            if (!validiereDaten(wunschSpieß, spieße)) { return; }
+            if (!validiereDaten(wunschSpieß, spieße)) {
+                Console.ReadLine();
+                return; }
 
             Console.WriteLine("WUNSCHSORTEN:\n{0}", string.Join(", ", wunschSpieß.obstSorten));
             Console.WriteLine("\nBEOBACHTETE SPIESSE:");
@@ -46,7 +48,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// </summary>
         /// <param name="datenSet">number of file (eg spieße3.txt -> number=3)</param>
         /// <returns>Tuple von Wunschspieß und einer Liste von beobachteten Spießen</returns>
-        public static (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) readData(int datenSet) {
+        public static (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) leseDaten(int datenSet) {
             string[] lines = System.IO.File.ReadAllLines(Environment.CurrentDirectory + "/spieße" + datenSet + ".txt");
             Spieß wunschspieß = new Spieß(new List<int>(), lines[1].Trim().Split(' ').ToList());
             List<Spieß> spieße = new List<Spieß>();
@@ -61,7 +63,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         /// </summary>
         /// <param name="wunschSpieß"></param>
         /// <param name="spieße"></param>
-        /// <returns></returns>
+        /// <returns>false wenn Programm abgebrochen werden soll</returns>
         public static bool validiereDaten(Spieß wunschSpieß, List<Spieß> spieße) {
             bool valide = true;
             foreach (Spieß sp in spieße) {
