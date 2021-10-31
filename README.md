@@ -49,8 +49,12 @@ ausgeben.
 
 ## Lösungsansatz
 
-1. iterativ werden alle Spiesse in kleinstmögliche Spieße aufgeteilt. Dazu vergleicht das Programm alle Spieße paarweise 
-und bildet aus den gemeinsamen Obstsorten und Schüsselnummern des Paares einen neuen, kleineren Spieß. SO kann man die 
+1. iterativ werden alle Spiesse in kleinstmögliche Spieße aufgeteilt. Dazu vergleicht das Programm alle Spieße paarweise
+und bildet aus den gemeinsamen Obstsorten und Schüsselnummern des Paares einen neuen, kleineren Spieß. SO kann man die
 Grundaussage der Daten, welche Sorten zu welchen Schüsseln gehören, extrahieren.
 2. nicht-beobachtete Obstsorten und Schüsselnummern werden als eigener Spieß ergänzt
 3. bei jedem Spieß wird überprüft, ob seine Obstsorten im Wunschspieß vorkommen. (in Arbeit: Quantencomputer alternative)
+
+## Programminstallation
+
+Am einfachsten ist das Programm über Visual Studio ausführbar. Dazu muss die ".sln" Datei im Spiessgesellen Ordner geöffnet werden. Um das Programm auszuführen, muss in Visual Studio die Programmiersprache C# installiert sein.
