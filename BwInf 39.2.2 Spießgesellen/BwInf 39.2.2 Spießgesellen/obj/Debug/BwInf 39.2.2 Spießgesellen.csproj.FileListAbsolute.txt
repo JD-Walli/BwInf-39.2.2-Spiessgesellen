@@ -8,3 +8,13 @@ C:\Users\Jakov\Desktop\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spi
 C:\Users\Jakov\Desktop\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39.2.2 Spießgesellen.csproj.CopyComplete
 C:\Users\Jakov\Desktop\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39-2-2 Spießgesellen.exe
 C:\Users\Jakov\Desktop\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39-2-2 Spießgesellen.pdb
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\bin\Debug\BwInf 39-2-2 Spießgesellen.exe.config
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\bin\Debug\BwInf 39-2-2 Spießgesellen.exe
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\bin\Debug\BwInf 39-2-2 Spießgesellen.pdb
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\bin\Debug\QA_Communication.exe
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\bin\Debug\QA_Communication.pdb
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39.2.2 Spießgesellen.csprojAssemblyReference.cache
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39.2.2 Spießgesellen.csproj.CoreCompileInputs.cache
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39.2.2 Spießgesellen.csproj.CopyComplete
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39-2-2 Spießgesellen.exe
+E:\git\BWInf 20\BwInf 39.2.2 Spiessgesellen\BwInf 39.2.2 Spießgesellen\BwInf 39.2.2 Spießgesellen\obj\Debug\BwInf 39-2-2 Spießgesellen.pdb

@@ -63,6 +63,8 @@ namespace BwInf_39_2_2_Spießgesellen {
                     }
                 }
             }
+            QA_Communication.Matrix.saveMatrix(matrix);
+
             //Matrix verkleinern (Reihen und Spalten entfernen, die leer sind)
             List<int> leereReihen = findeLeereReihen(matrix);
             matrix = verkleinereMatrix(matrix, leereReihen);

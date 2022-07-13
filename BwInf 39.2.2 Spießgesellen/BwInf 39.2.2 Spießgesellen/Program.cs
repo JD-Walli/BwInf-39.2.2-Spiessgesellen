@@ -12,7 +12,7 @@ namespace BwInf_39_2_2_Spießgesellen {
         [STAThread]
 
         static void Main(string[] args) {
-            int datenSet = 2;
+            int datenSet = 0;
             Console.WriteLine(Environment.CurrentDirectory);
             (Spieß wunschSpieß, List<Spieß> spieße, int gesamtObst) = leseDaten(datenSet);
             basisAlgorithmus algo = new basisAlgorithmus(wunschSpieß, spieße, gesamtObst);
